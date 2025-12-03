@@ -1,0 +1,252 @@
+---
+title: Functions
+description: Defining and using functions in Setsuna
+---
+
+# Functions
+
+Functions are first-class citizens in Setsuna. You can define named functions, create anonymous lambdas, and pass functions as arguments.
+
+## Named Functions
+
+Define functions using the `fn` keyword:
+
+```setsuna
+fn greet(name) {
+    print("Hello, " + name + "!")
+}
+
+greet("World")  // Hello, World!
+```
+
+### Arrow Syntax
+
+For single-expression functions, use the arrow syntax:
+
+```setsuna
+fn square(x) => x * x
+fn add(a, b) => a + b
+
+print(square(5))   // 25
+print(add(3, 4))   // 7
+```
+
+### Multi-line Functions
+
+Use blocks for functions with multiple expressions:
+
+```setsuna
+fn calculate(x, y) {
+    let sum = x + y
+    let product = x * y
+    print("Sum: " + str(sum))
+    print("Product: " + str(product))
+    sum + product  // Last expression is returned
+}
+```
+
+<Note>
+Functions return the value of their last expression. There's no explicit `return` keyword.
+</Note>
+
+## Anonymous Functions (Lambdas)
+
+Create functions without names using lambda syntax:
+
+```setsuna
+let double = (x) => x * 2
+let add = (a, b) => a + b
+
+print(double(21))  // 42
+print(add(10, 5))  // 15
+```
+
+### Lambda Syntax Variations
+
+```setsuna
+// Single parameter
+(x) => x * 2
+
+// Multiple parameters
+(a, b) => a + b
+
+// No parameters
+() => 42
+
+// With block body
+(x) => {
+    let squared = x * x
+    squared + 1
+}
+```
+
+## Higher-Order Functions
+
+Functions that take or return other functions:
+
+### Functions as Arguments
+
+```setsuna
+fn apply_twice(f, x) {
+    f(f(x))
+}
+
+let double = (x) => x * 2
+print(apply_twice(double, 5))  // 20
+
+// With inline lambda
+print(apply_twice((x) => x + 1, 10))  // 12
+```
+
+### Functions Returning Functions
+
+```setsuna
+fn make_adder(n) {
+    (x) => x + n  // Returns a function
+}
+
+let add5 = make_adder(5)
+let add10 = make_adder(10)
+
+print(add5(3))   // 8
+print(add10(3))  // 13
+```
+
+## Closures
+
+Functions capture variables from their enclosing scope:
+
+```setsuna
+fn counter() {
+    let count = 0
+    () => {
+        let count = count + 1
+        count
+    }
+}
+
+let next = counter()
+print(next())  // 1
+print(next())  // 1 (immutable - creates new binding each time)
+```
+
+<Warning>
+Since Setsuna is purely functional with immutable bindings, closures capture values, not mutable references.
+</Warning>
+
+## Recursion
+
+Functions can call themselves recursively:
+
+```setsuna
+fn factorial(n) {
+    match n {
+        0 => 1,
+        _ => n * factorial(n - 1)
+    }
+}
+
+print(factorial(5))  // 120
+```
+
+### Tail Recursion
+
+For better performance, use tail-recursive patterns:
+
+```setsuna
+fn factorial_tail(n) {
+    fn helper(n, acc) {
+        match n {
+            0 => acc,
+            _ => helper(n - 1, n * acc)
+        }
+    }
+    helper(n, 1)
+}
+
+print(factorial_tail(5))  // 120
+```
+
+## Common Functional Patterns
+
+### Map
+
+Apply a function to each element:
+
+```setsuna
+fn map(f, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => cons(f(h), map(f, t))
+    }
+}
+
+let nums = [1, 2, 3, 4, 5]
+let squared = map((x) => x * x, nums)
+print(squared)  // [1, 4, 9, 16, 25]
+```
+
+### Filter
+
+Keep elements matching a predicate:
+
+```setsuna
+fn filter(pred, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => if pred(h) {
+            cons(h, filter(pred, t))
+        } else {
+            filter(pred, t)
+        }
+    }
+}
+
+let nums = [1, 2, 3, 4, 5, 6]
+let evens = filter((x) => x % 2 == 0, nums)
+print(evens)  // [2, 4, 6]
+```
+
+### Fold/Reduce
+
+Combine elements into a single value:
+
+```setsuna
+fn fold(f, init, lst) {
+    match lst {
+        [] => init,
+        [h, ...t] => fold(f, f(init, h), t)
+    }
+}
+
+let nums = [1, 2, 3, 4, 5]
+let sum = fold((a, b) => a + b, 0, nums)
+print(sum)  // 15
+```
+
+## Function Composition
+
+Combine functions to create new ones:
+
+```setsuna
+fn compose(f, g) {
+    (x) => f(g(x))
+}
+
+let double = (x) => x * 2
+let add1 = (x) => x + 1
+
+let double_then_add1 = compose(add1, double)
+print(double_then_add1(5))  // 11 (5*2 + 1)
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Control Flow" icon="code-branch" href="/basics/control-flow">
+    Learn about conditionals and expressions
+  </Card>
+  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
+    Master pattern matching in functions
+  </Card>
+</CardGroup>

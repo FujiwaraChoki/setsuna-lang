@@ -1,0 +1,370 @@
+---
+title: String Functions
+description: String manipulation functions in Setsuna
+---
+
+# String Functions
+
+Setsuna provides a comprehensive set of built-in functions for string manipulation.
+
+## Overview
+
+| Function | Description |
+|----------|-------------|
+| `len` | Get string length |
+| `substr` | Extract substring |
+| `split` | Split string into list |
+| `join` | Join list into string |
+| `uppercase` | Convert to uppercase |
+| `lowercase` | Convert to lowercase |
+| `trim` | Remove whitespace from both ends |
+| `trim_start` | Remove leading whitespace |
+| `trim_end` | Remove trailing whitespace |
+| `contains` | Check if string contains substring |
+| `starts_with` | Check if string starts with prefix |
+| `ends_with` | Check if string ends with suffix |
+| `replace` | Replace first occurrence |
+| `replace_all` | Replace all occurrences |
+| `char_at` | Get character at index |
+| `chars` | Convert string to list of characters |
+| `index_of` | Find index of substring |
+
+## String Length
+
+### len
+
+Get the number of characters in a string.
+
+```setsuna
+len("hello")       // 5
+len("")            // 0
+len("hello world") // 11
+```
+
+**Signature:** `len(string) -> Int`
+
+## Substring Operations
+
+### substr
+
+Extract a substring from start index to end index (exclusive).
+
+```setsuna
+substr("hello", 0, 2)    // "he"
+substr("hello", 1, 4)    // "ell"
+substr("hello", 2, 5)    // "llo"
+```
+
+**Signature:** `substr(string, start, end) -> String`
+
+### char_at
+
+Get the character at a specific index.
+
+```setsuna
+char_at("hello", 0)      // "h"
+char_at("hello", 4)      // "o"
+char_at("hello", 10)     // Error: index out of bounds
+```
+
+**Signature:** `char_at(string, index) -> String`
+
+### chars
+
+Convert a string to a list of single-character strings.
+
+```setsuna
+chars("abc")             // ["a", "b", "c"]
+chars("hello")           // ["h", "e", "l", "l", "o"]
+chars("")                // []
+```
+
+**Signature:** `chars(string) -> List<String>`
+
+## Search Functions
+
+### contains
+
+Check if a string contains a substring.
+
+```setsuna
+contains("hello world", "world")  // true
+contains("hello world", "foo")    // false
+contains("hello", "")             // true
+```
+
+**Signature:** `contains(string, substring) -> Bool`
+
+### starts_with
+
+Check if a string starts with a prefix.
+
+```setsuna
+starts_with("hello", "he")        // true
+starts_with("hello", "lo")        // false
+starts_with("hello", "")          // true
+```
+
+**Signature:** `starts_with(string, prefix) -> Bool`
+
+### ends_with
+
+Check if a string ends with a suffix.
+
+```setsuna
+ends_with("hello", "lo")          // true
+ends_with("hello", "he")          // false
+ends_with("hello", "")            // true
+```
+
+**Signature:** `ends_with(string, suffix) -> Bool`
+
+### index_of
+
+Find the index of the first occurrence of a substring. Returns -1 if not found.
+
+```setsuna
+index_of("hello", "l")            // 2
+index_of("hello", "lo")           // 3
+index_of("hello", "x")            // -1
+```
+
+**Signature:** `index_of(string, substring) -> Int`
+
+## Case Conversion
+
+### uppercase
+
+Convert a string to uppercase.
+
+```setsuna
+uppercase("hello")       // "HELLO"
+uppercase("Hello World") // "HELLO WORLD"
+uppercase("123abc")      // "123ABC"
+```
+
+**Signature:** `uppercase(string) -> String`
+
+### lowercase
+
+Convert a string to lowercase.
+
+```setsuna
+lowercase("HELLO")       // "hello"
+lowercase("Hello World") // "hello world"
+lowercase("123ABC")      // "123abc"
+```
+
+**Signature:** `lowercase(string) -> String`
+
+## Whitespace Handling
+
+### trim
+
+Remove whitespace from both ends of a string.
+
+```setsuna
+trim("  hello  ")        // "hello"
+trim("\t\nhello\n\t")    // "hello"
+trim("hello")            // "hello"
+```
+
+**Signature:** `trim(string) -> String`
+
+### trim_start
+
+Remove whitespace from the start of a string.
+
+```setsuna
+trim_start("  hello  ")  // "hello  "
+trim_start("\t\nhello")  // "hello"
+```
+
+**Signature:** `trim_start(string) -> String`
+
+### trim_end
+
+Remove whitespace from the end of a string.
+
+```setsuna
+trim_end("  hello  ")    // "  hello"
+trim_end("hello\n\t")    // "hello"
+```
+
+**Signature:** `trim_end(string) -> String`
+
+## Split and Join
+
+### split
+
+Split a string by a delimiter into a list of strings.
+
+```setsuna
+split("a,b,c", ",")              // ["a", "b", "c"]
+split("hello world", " ")        // ["hello", "world"]
+split("one::two::three", "::")   // ["one", "two", "three"]
+split("hello", "")               // ["h", "e", "l", "l", "o"]
+```
+
+**Signature:** `split(string, delimiter) -> List<String>`
+
+### join
+
+Join a list of strings with a delimiter.
+
+```setsuna
+join(["a", "b", "c"], ",")       // "a,b,c"
+join(["hello", "world"], " ")    // "hello world"
+join(["one", "two"], "")         // "onetwo"
+join([], ",")                    // ""
+```
+
+**Signature:** `join(list, delimiter) -> String`
+
+## Replace Functions
+
+### replace
+
+Replace the first occurrence of a pattern.
+
+```setsuna
+replace("hello world", "world", "there")  // "hello there"
+replace("aaa", "a", "b")                   // "baa"
+replace("hello", "x", "y")                 // "hello" (no match)
+```
+
+**Signature:** `replace(string, pattern, replacement) -> String`
+
+### replace_all
+
+Replace all occurrences of a pattern.
+
+```setsuna
+replace_all("hello world world", "world", "there")  // "hello there there"
+replace_all("aaa", "a", "b")                         // "bbb"
+replace_all("hello", "l", "L")                       // "heLLo"
+```
+
+**Signature:** `replace_all(string, pattern, replacement) -> String`
+
+## String Concatenation
+
+Use the `+` operator to concatenate strings:
+
+```setsuna
+"hello" + " " + "world"    // "hello world"
+"value: " + str(42)        // "value: 42"
+```
+
+<Note>
+You must use `str()` to convert non-string values before concatenation.
+</Note>
+
+## Common Patterns
+
+### Building Strings
+
+```setsuna
+fn format_person(name, age) {
+    "Name: " + name + ", Age: " + str(age)
+}
+
+format_person("Alice", 30)  // "Name: Alice, Age: 30"
+```
+
+### Parsing Input
+
+```setsuna
+fn parse_csv_line(line) {
+    split(line, ",")
+}
+
+parse_csv_line("Alice,30,Tokyo")  // ["Alice", "30", "Tokyo"]
+```
+
+### Validation
+
+```setsuna
+fn is_valid_email(email) {
+    contains(email, "@") && contains(email, ".")
+}
+
+fn is_valid_identifier(s) {
+    len(s) > 0 && !starts_with(s, "0")
+}
+```
+
+### String Transformation
+
+```setsuna
+fn normalize(s) {
+    lowercase(trim(s))
+}
+
+fn title_case(s) {
+    let words = split(s, " ")
+    let capitalized = map((w) => {
+        if len(w) > 0 {
+            uppercase(char_at(w, 0)) + lowercase(substr(w, 1, len(w)))
+        } else {
+            w
+        }
+    }, words)
+    join(capitalized, " ")
+}
+
+title_case("hello world")  // "Hello World"
+```
+
+### String Repetition
+
+```setsuna
+fn repeat(s, n) {
+    fn helper(acc, count) {
+        if count == 0 {
+            acc
+        } else {
+            helper(acc + s, count - 1)
+        }
+    }
+    helper("", n)
+}
+
+repeat("ab", 3)  // "ababab"
+```
+
+### Padding
+
+```setsuna
+fn pad_left(s, width, char) {
+    let padding = width - len(s)
+    if padding <= 0 {
+        s
+    } else {
+        repeat(char, padding) + s
+    }
+}
+
+fn pad_right(s, width, char) {
+    let padding = width - len(s)
+    if padding <= 0 {
+        s
+    } else {
+        s + repeat(char, padding)
+    }
+}
+
+pad_left("42", 5, "0")   // "00042"
+pad_right("hi", 5, " ")  // "hi   "
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
+    All built-in functions
+  </Card>
+  <Card title="I/O Functions" icon="file" href="/reference/io">
+    Input/output operations
+  </Card>
+</CardGroup>

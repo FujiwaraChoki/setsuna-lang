@@ -1,0 +1,341 @@
+---
+title: Language Grammar
+description: Formal grammar specification for Setsuna
+---
+
+# Language Grammar
+
+This page provides a formal specification of Setsuna's grammar in Extended Backus-Naur Form (EBNF).
+
+## Notation
+
+| Symbol | Meaning |
+|--------|---------|
+| `::=` | Definition |
+| `\|` | Alternative |
+| `[ ]` | Optional (0 or 1) |
+| `{ }` | Repetition (0 or more) |
+| `( )` | Grouping |
+| `"x"` | Terminal symbol |
+| `'x'` | Terminal character |
+
+## Program Structure
+
+```ebnf
+program         ::= { declaration }
+
+declaration     ::= let_binding
+                  | function_def
+                  | type_def
+                  | module_def
+                  | expression
+
+let_binding     ::= "let" pattern "=" expression
+
+function_def    ::= "fn" identifier "(" [ param_list ] ")" function_body
+
+function_body   ::= "=>" expression
+                  | block
+
+param_list      ::= identifier { "," identifier }
+
+type_def        ::= "type" identifier "{" constructor_list "}"
+
+constructor_list ::= constructor { "," constructor }
+
+constructor     ::= identifier [ "(" param_list ")" ]
+
+module_def      ::= "module" identifier "{" { declaration } "}"
+```
+
+## Expressions
+
+```ebnf
+expression      ::= if_expr
+                  | match_expr
+                  | lambda_expr
+                  | binary_expr
+
+if_expr         ::= "if" expression block [ "else" ( if_expr | block ) ]
+
+match_expr      ::= "match" expression "{" match_arms "}"
+
+match_arms      ::= match_arm { "," match_arm } [ "," ]
+
+match_arm       ::= pattern [ "if" expression ] "=>" expression
+
+lambda_expr     ::= "(" [ param_list ] ")" "=>" expression
+
+binary_expr     ::= unary_expr { binary_op unary_expr }
+
+unary_expr      ::= [ unary_op ] postfix_expr
+
+postfix_expr    ::= primary_expr { postfix_op }
+
+postfix_op      ::= "(" [ arg_list ] ")"    (* function call *)
+                  | "." identifier           (* field access *)
+                  | "." integer              (* tuple index *)
+
+primary_expr    ::= literal
+                  | identifier
+                  | "(" expression ")"
+                  | "[" [ expr_list ] "]"
+                  | "(" expression "," expr_list ")"  (* tuple *)
+                  | "{" [ field_list ] "}"            (* record *)
+                  | block
+
+block           ::= "{" { statement } expression "}"
+
+statement       ::= let_binding
+                  | expression
+```
+
+## Patterns
+
+```ebnf
+pattern         ::= literal_pattern
+                  | identifier_pattern
+                  | wildcard_pattern
+                  | list_pattern
+                  | tuple_pattern
+                  | record_pattern
+                  | constructor_pattern
+
+literal_pattern ::= integer | float | string | "true" | "false"
+
+identifier_pattern ::= identifier
+
+wildcard_pattern ::= "_"
+
+list_pattern    ::= "[" [ pattern_list [ "," "..." identifier ] ] "]"
+
+tuple_pattern   ::= "(" pattern "," pattern_list ")"
+
+record_pattern  ::= "{" field_pattern_list "}"
+
+field_pattern_list ::= field_pattern { "," field_pattern }
+
+field_pattern   ::= identifier ":" pattern
+
+constructor_pattern ::= identifier [ "(" pattern_list ")" ]
+
+pattern_list    ::= pattern { "," pattern }
+```
+
+## Operators
+
+```ebnf
+binary_op       ::= "+" | "-" | "*" | "/" | "%"
+                  | "==" | "!=" | "<" | ">" | "<=" | ">="
+                  | "&&" | "||"
+
+unary_op        ::= "-" | "!"
+```
+
+## Literals
+
+```ebnf
+literal         ::= integer
+                  | float
+                  | string
+                  | boolean
+
+integer         ::= [ "-" ] digit { digit }
+
+float           ::= [ "-" ] digit { digit } "." digit { digit }
+
+string          ::= '"' { string_char } '"'
+
+string_char     ::= <any character except '"' and '\'>
+                  | escape_seq
+
+escape_seq      ::= "\\" | '\"' | "\n" | "\t" | "\r"
+
+boolean         ::= "true" | "false"
+
+identifier      ::= letter { letter | digit | "_" }
+
+letter          ::= 'a'..'z' | 'A'..'Z'
+
+digit           ::= '0'..'9'
+```
+
+## Lists and Records
+
+```ebnf
+expr_list       ::= expression { "," expression }
+
+arg_list        ::= expression { "," expression }
+
+field_list      ::= field { "," field }
+
+field           ::= identifier ":" expression
+```
+
+## Lexical Elements
+
+### Keywords
+
+```
+let     fn      if      else    match
+type    module  true    false
+```
+
+### Reserved for Future Use
+
+```
+import  export  trait   impl    where
+async   await   mut     ref     pub
+```
+
+### Comments
+
+```ebnf
+line_comment    ::= "//" { <any character except newline> }
+```
+
+## Examples
+
+### Let Binding
+
+```setsuna
+let x = 5
+let name = "Alice"
+let (a, b) = (1, 2)
+let [h, ...t] = [1, 2, 3]
+```
+
+**Grammar derivation:**
+```
+let_binding → "let" pattern "=" expression
+            → "let" identifier "=" literal
+            → "let" "x" "=" "5"
+```
+
+### Function Definition
+
+```setsuna
+fn add(x, y) => x + y
+
+fn factorial(n) {
+    match n {
+        0 => 1,
+        _ => n * factorial(n - 1)
+    }
+}
+```
+
+**Grammar derivation:**
+```
+function_def → "fn" identifier "(" param_list ")" function_body
+             → "fn" "add" "(" "x" "," "y" ")" "=>" binary_expr
+             → "fn" "add" "(" "x" "," "y" ")" "=>" "x" "+" "y"
+```
+
+### Type Definition
+
+```setsuna
+type Option {
+    Some(value),
+    None
+}
+
+type Tree {
+    Leaf(value),
+    Node(left, right)
+}
+```
+
+**Grammar derivation:**
+```
+type_def → "type" identifier "{" constructor_list "}"
+         → "type" "Option" "{" constructor "," constructor "}"
+         → "type" "Option" "{" "Some" "(" "value" ")" "," "None" "}"
+```
+
+### Match Expression
+
+```setsuna
+match value {
+    0 => "zero",
+    n if n > 0 => "positive",
+    _ => "negative"
+}
+```
+
+**Grammar derivation:**
+```
+match_expr → "match" expression "{" match_arms "}"
+           → "match" "value" "{" match_arm "," match_arm "," match_arm "}"
+```
+
+### Lambda Expression
+
+```setsuna
+let double = (x) => x * 2
+let add = (a, b) => a + b
+let constant = () => 42
+```
+
+**Grammar derivation:**
+```
+lambda_expr → "(" param_list ")" "=>" expression
+            → "(" "x" ")" "=>" binary_expr
+            → "(" "x" ")" "=>" "x" "*" "2"
+```
+
+## Precedence and Associativity
+
+### Expression Precedence (Highest to Lowest)
+
+1. **Primary**: Literals, identifiers, parenthesized expressions
+2. **Postfix**: Function calls (`.`), field access (`.`)
+3. **Unary**: `-`, `!`
+4. **Multiplicative**: `*`, `/`, `%`
+5. **Additive**: `+`, `-`
+6. **Relational**: `<`, `>`, `<=`, `>=`
+7. **Equality**: `==`, `!=`
+8. **Logical AND**: `&&`
+9. **Logical OR**: `||`
+
+### Associativity
+
+- **Left-associative**: `+`, `-`, `*`, `/`, `%`, comparisons, `&&`, `||`
+- **Right-associative**: `=>`
+
+## Whitespace and Formatting
+
+- Whitespace is generally ignored except as token separator
+- Newlines can appear within blocks and expressions
+- Indentation is not significant (not like Python)
+
+```setsuna
+// These are equivalent:
+let x = if true { 1 } else { 2 }
+
+let x = if true {
+    1
+} else {
+    2
+}
+
+let x = if true
+{
+    1
+}
+else
+{
+    2
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
+    Standard library reference
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Start writing Setsuna
+  </Card>
+</CardGroup>

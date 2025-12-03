@@ -571,8 +571,13 @@ void registerBuiltins(EnvPtr env) {
 
     // ============ I/O ============
 
-    // input() - Read a line from stdin
-    env->define("input", makeBuiltin("input", 0, [](const std::vector<ValuePtr>&) {
+    // input([prompt]) - Read a line from stdin with optional prompt
+    env->define("input", makeBuiltin("input", -1, [](const std::vector<ValuePtr>& args) {
+        if (!args.empty()) {
+            auto prompt = force(args[0]);
+            std::cout << (prompt->isString() ? prompt->asString() : prompt->toString());
+            std::cout.flush();
+        }
         std::string line;
         std::getline(std::cin, line);
         return makeString(line);

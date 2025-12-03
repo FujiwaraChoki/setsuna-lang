@@ -1,0 +1,135 @@
+---
+title: Variables & Bindings
+description: Working with variables and let bindings in Setsuna
+---
+
+# Variables & Bindings
+
+In Setsuna, variables are created using `let` bindings. All bindings are immutable by default, embracing functional programming principles.
+
+## Let Bindings
+
+The `let` keyword creates a new variable binding:
+
+```setsuna
+let name = "Setsuna"
+let age = 1
+let pi = 3.14159
+let active = true
+```
+
+## Type Inference
+
+Setsuna automatically infers the type of variables from their values:
+
+```setsuna
+let x = 42        // Int
+let y = 3.14      // Float
+let s = "hello"   // String
+let b = true      // Bool
+```
+
+<Note>
+You don't need to specify types - Setsuna's type inference figures them out automatically.
+</Note>
+
+## Shadowing
+
+You can shadow a variable by binding a new value to the same name:
+
+```setsuna
+let x = 5
+print(x)  // 5
+
+let x = x * 2
+print(x)  // 10
+
+let x = "now a string"
+print(x)  // "now a string"
+```
+
+Shadowing creates a new binding rather than mutating the existing one.
+
+## Scope
+
+Variables are scoped to their containing block:
+
+```setsuna
+let outer = 1
+
+{
+    let inner = 2
+    print(outer)  // 1 - can access outer scope
+    print(inner)  // 2
+}
+
+// print(inner)  // Error: inner is not in scope
+```
+
+## Let in Functions
+
+Variables defined in functions are local to that function:
+
+```setsuna
+fn calculate() {
+    let result = 42
+    result * 2
+}
+
+print(calculate())  // 84
+// print(result)    // Error: result is not in scope
+```
+
+## Naming Conventions
+
+<Info>
+Variable and function names should use `snake_case`. Type names and constructors use `PascalCase`.
+</Info>
+
+```setsuna
+// Good
+let user_name = "Alice"
+let total_count = 100
+fn calculate_sum(numbers) => ...
+
+// Types use PascalCase
+type Option {
+    Some(value),
+    None
+}
+```
+
+## Examples
+
+### Compound Bindings
+
+```setsuna
+let a = 10
+let b = 20
+let sum = a + b
+let product = a * b
+
+print("Sum: " + str(sum))        // Sum: 30
+print("Product: " + str(product)) // Product: 200
+```
+
+### Using Let with Functions
+
+```setsuna
+// Bind a function result
+let squared = (x) => x * x
+let result = squared(5)
+print(result)  // 25
+
+// Chain operations
+let numbers = [1, 2, 3, 4, 5]
+let doubled = map((x) => x * 2, numbers)
+let sum = fold((a, b) => a + b, 0, doubled)
+print(sum)  // 30
+```
+
+## Next Steps
+
+<Card title="Data Types" icon="shapes" href="/basics/types">
+  Learn about all the data types available in Setsuna
+</Card>

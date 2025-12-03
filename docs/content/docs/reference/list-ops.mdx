@@ -1,0 +1,626 @@
+---
+title: List Operations
+description: Working with lists in Setsuna
+---
+
+# List Operations
+
+Lists are one of the most important data structures in Setsuna. This page covers all built-in list operations and the standard library functions.
+
+<Note>
+Setsuna automatically loads the standard library prelude (`stdlib/prelude.stsn`) which provides higher-order functions like `map`, `filter`, `fold`, and many more. These are available immediately without any imports.
+</Note>
+
+## Creating Lists
+
+```setsuna
+// Empty list
+let empty = []
+
+// List literal
+let nums = [1, 2, 3, 4, 5]
+
+// Mixed types (dynamically typed)
+let mixed = [1, "two", true, 3.14]
+
+// Nested lists
+let matrix = [[1, 2], [3, 4], [5, 6]]
+```
+
+## Built-in List Functions
+
+### head
+
+Returns the first element of a list.
+
+```setsuna
+head([1, 2, 3])      // 1
+head(["a", "b"])     // "a"
+```
+
+<Warning>
+Calling `head` on an empty list throws a runtime error.
+</Warning>
+
+### tail
+
+Returns all elements except the first.
+
+```setsuna
+tail([1, 2, 3])      // [2, 3]
+tail([1, 2])         // [2]
+tail([1])            // []
+```
+
+<Warning>
+Calling `tail` on an empty list throws a runtime error.
+</Warning>
+
+### cons
+
+Prepends an element to the front of a list.
+
+```setsuna
+cons(0, [1, 2, 3])   // [0, 1, 2, 3]
+cons("x", [])        // ["x"]
+```
+
+This is the primary way to build lists in functional programming:
+
+```setsuna
+// Building a list
+let list = cons(1, cons(2, cons(3, [])))  // [1, 2, 3]
+```
+
+### len
+
+Returns the number of elements in a list.
+
+```setsuna
+len([1, 2, 3])       // 3
+len([])              // 0
+len([[1, 2], [3]])   // 2 (counts outer elements)
+```
+
+### empty
+
+Checks if a list is empty.
+
+```setsuna
+empty([])            // true
+empty([1])           // false
+```
+
+Equivalent to `len(lst) == 0` but more idiomatic.
+
+### reverse
+
+Reverses a list.
+
+```setsuna
+reverse([1, 2, 3])   // [3, 2, 1]
+reverse([])          // []
+```
+
+### append
+
+Concatenates two lists.
+
+```setsuna
+append([1, 2], [3, 4])   // [1, 2, 3, 4]
+append([], [1, 2])       // [1, 2]
+```
+
+## Standard Library Functions
+
+The following functions are provided by the standard library prelude and are available immediately.
+
+### map
+
+Apply a function to each element of a list.
+
+```setsuna
+let nums = [1, 2, 3, 4, 5]
+map((x) => x * 2, nums)        // [2, 4, 6, 8, 10]
+map((x) => x * x, nums)        // [1, 4, 9, 16, 25]
+map(str, nums)                 // ["1", "2", "3", "4", "5"]
+```
+
+**Signature:** `map(f, list) -> List`
+
+### filter
+
+Keep elements where the predicate returns true.
+
+```setsuna
+let nums = [1, 2, 3, 4, 5, 6]
+filter((x) => x % 2 == 0, nums)    // [2, 4, 6]
+filter((x) => x > 3, nums)         // [4, 5, 6]
+```
+
+**Signature:** `filter(predicate, list) -> List`
+
+### fold
+
+Left fold - accumulate a value across a list from left to right.
+
+```setsuna
+let nums = [1, 2, 3, 4, 5]
+fold((acc, x) => acc + x, 0, nums)   // 15 (sum)
+fold((acc, x) => acc * x, 1, nums)   // 120 (product)
+fold((acc, x) => max(acc, x), 0, nums) // 5 (maximum)
+```
+
+**Signature:** `fold(f, initial, list) -> Value`
+
+### reduce
+
+Fold without an initial value - uses first element as the initial accumulator.
+
+```setsuna
+let nums = [1, 2, 3, 4, 5]
+reduce((a, b) => a + b, nums)     // 15
+reduce(max, nums)                 // 5
+```
+
+**Signature:** `reduce(f, list) -> Value`
+
+<Warning>
+`reduce` throws an error if the list is empty.
+</Warning>
+
+### fold_right
+
+Right fold - accumulate from right to left.
+
+```setsuna
+let nums = [1, 2, 3]
+fold_right((x, acc) => cons(x, acc), [], nums)  // [1, 2, 3]
+```
+
+**Signature:** `fold_right(f, initial, list) -> Value`
+
+### take
+
+Take the first n elements of a list.
+
+```setsuna
+take(3, [1, 2, 3, 4, 5])    // [1, 2, 3]
+take(10, [1, 2, 3])         // [1, 2, 3]
+take(0, [1, 2, 3])          // []
+```
+
+**Signature:** `take(n, list) -> List`
+
+### drop
+
+Drop the first n elements of a list.
+
+```setsuna
+drop(2, [1, 2, 3, 4, 5])    // [3, 4, 5]
+drop(10, [1, 2, 3])         // []
+drop(0, [1, 2, 3])          // [1, 2, 3]
+```
+
+**Signature:** `drop(n, list) -> List`
+
+### take_while
+
+Take elements while the predicate is true.
+
+```setsuna
+take_while((x) => x < 4, [1, 2, 3, 4, 5])  // [1, 2, 3]
+take_while((x) => x > 0, [1, 2, 0, 3])     // [1, 2]
+```
+
+**Signature:** `take_while(predicate, list) -> List`
+
+### drop_while
+
+Drop elements while the predicate is true.
+
+```setsuna
+drop_while((x) => x < 4, [1, 2, 3, 4, 5])  // [4, 5]
+drop_while((x) => x > 0, [1, 2, 0, 3])     // [0, 3]
+```
+
+**Signature:** `drop_while(predicate, list) -> List`
+
+### zip
+
+Combine two lists into a list of tuples.
+
+```setsuna
+zip([1, 2, 3], ["a", "b", "c"])    // [(1, "a"), (2, "b"), (3, "c")]
+zip([1, 2], [10, 20, 30])          // [(1, 10), (2, 20)]
+```
+
+**Signature:** `zip(list1, list2) -> List<Tuple>`
+
+### zip_with
+
+Combine two lists using a function.
+
+```setsuna
+zip_with((a, b) => a + b, [1, 2, 3], [10, 20, 30])  // [11, 22, 33]
+zip_with((a, b) => a * b, [2, 3, 4], [10, 10, 10])  // [20, 30, 40]
+```
+
+**Signature:** `zip_with(f, list1, list2) -> List`
+
+### unzip
+
+Split a list of tuples into a tuple of lists.
+
+```setsuna
+unzip([(1, "a"), (2, "b"), (3, "c")])  // ([1, 2, 3], ["a", "b", "c"])
+```
+
+**Signature:** `unzip(list) -> Tuple<List, List>`
+
+### any
+
+Check if any element satisfies the predicate.
+
+```setsuna
+any((x) => x > 3, [1, 2, 3, 4, 5])    // true
+any((x) => x > 10, [1, 2, 3])          // false
+any((x) => x < 0, [])                  // false
+```
+
+**Signature:** `any(predicate, list) -> Bool`
+
+### all
+
+Check if all elements satisfy the predicate.
+
+```setsuna
+all((x) => x > 0, [1, 2, 3, 4, 5])    // true
+all((x) => x > 3, [1, 2, 3, 4, 5])    // false
+all((x) => x > 0, [])                  // true
+```
+
+**Signature:** `all(predicate, list) -> Bool`
+
+### none
+
+Check if no elements satisfy the predicate.
+
+```setsuna
+none((x) => x < 0, [1, 2, 3])    // true
+none((x) => x > 2, [1, 2, 3])    // false
+```
+
+**Signature:** `none(predicate, list) -> Bool`
+
+### find
+
+Find the first element satisfying the predicate. Returns unit `()` if not found.
+
+```setsuna
+find((x) => x > 3, [1, 2, 3, 4, 5])    // 4
+find((x) => x > 10, [1, 2, 3])          // ()
+```
+
+**Signature:** `find(predicate, list) -> Value | ()`
+
+### find_index
+
+Find the index of the first element satisfying the predicate. Returns -1 if not found.
+
+```setsuna
+find_index((x) => x > 3, [1, 2, 3, 4, 5])    // 3
+find_index((x) => x > 10, [1, 2, 3])          // -1
+```
+
+**Signature:** `find_index(predicate, list) -> Int`
+
+### flatten
+
+Flatten a list of lists by one level.
+
+```setsuna
+flatten([[1, 2], [3, 4], [5]])    // [1, 2, 3, 4, 5]
+flatten([[[1]], [[2]]])            // [[1], [2]]
+flatten([])                        // []
+```
+
+**Signature:** `flatten(list) -> List`
+
+### flat_map
+
+Map then flatten.
+
+```setsuna
+flat_map((x) => [x, x * 2], [1, 2, 3])    // [1, 2, 2, 4, 3, 6]
+```
+
+**Signature:** `flat_map(f, list) -> List`
+
+### intersperse
+
+Insert a separator between elements.
+
+```setsuna
+intersperse(0, [1, 2, 3])    // [1, 0, 2, 0, 3]
+intersperse(",", ["a", "b", "c"])  // ["a", ",", "b", ",", "c"]
+```
+
+**Signature:** `intersperse(separator, list) -> List`
+
+### sum
+
+Sum all numbers in a list.
+
+```setsuna
+sum([1, 2, 3, 4, 5])    // 15
+sum([])                  // 0
+```
+
+**Signature:** `sum(list) -> Number`
+
+### product
+
+Multiply all numbers in a list.
+
+```setsuna
+product([1, 2, 3, 4, 5])    // 120
+product([])                  // 1
+```
+
+**Signature:** `product(list) -> Number`
+
+### maximum
+
+Get the maximum element.
+
+```setsuna
+maximum([3, 1, 4, 1, 5, 9])    // 9
+maximum(["a", "c", "b"])       // "c"
+```
+
+**Signature:** `maximum(list) -> Value`
+
+<Warning>
+`maximum` throws an error if the list is empty.
+</Warning>
+
+### minimum
+
+Get the minimum element.
+
+```setsuna
+minimum([3, 1, 4, 1, 5, 9])    // 1
+minimum(["a", "c", "b"])       // "a"
+```
+
+**Signature:** `minimum(list) -> Value`
+
+<Warning>
+`minimum` throws an error if the list is empty.
+</Warning>
+
+### compose
+
+Compose two functions: `compose(f, g)(x)` = `f(g(x))`
+
+```setsuna
+let double = (x) => x * 2
+let addOne = (x) => x + 1
+let doubleThenAdd = compose(addOne, double)
+doubleThenAdd(5)    // 11 (5 * 2 = 10, 10 + 1 = 11)
+```
+
+**Signature:** `compose(f, g) -> Function`
+
+### pipe
+
+Pipe two functions: `pipe(f, g)(x)` = `g(f(x))`
+
+```setsuna
+let addOne = (x) => x + 1
+let double = (x) => x * 2
+let addThenDouble = pipe(addOne, double)
+addThenDouble(5)    // 12 (5 + 1 = 6, 6 * 2 = 12)
+```
+
+**Signature:** `pipe(f, g) -> Function`
+
+### identity
+
+Returns its argument unchanged.
+
+```setsuna
+identity(42)        // 42
+identity("hello")   // "hello"
+```
+
+**Signature:** `identity(x) -> x`
+
+### constant
+
+Returns a function that always returns the same value.
+
+```setsuna
+let alwaysFive = constant(5)
+alwaysFive("ignored")    // 5
+alwaysFive(100)          // 5
+```
+
+**Signature:** `constant(x) -> Function`
+
+### flip
+
+Flip the order of arguments to a function.
+
+```setsuna
+let subtract = (a, b) => a - b
+let flipped = flip(subtract)
+subtract(10, 3)     // 7
+flipped(10, 3)      // -7 (equivalent to subtract(3, 10))
+```
+
+**Signature:** `flip(f) -> Function`
+
+### replicate
+
+Create a list of n copies of a value.
+
+```setsuna
+replicate(5, "x")       // ["x", "x", "x", "x", "x"]
+replicate(3, 0)         // [0, 0, 0]
+replicate(0, "x")       // []
+```
+
+**Signature:** `replicate(n, value) -> List`
+
+### iterate
+
+Apply a function n times, collecting results.
+
+```setsuna
+iterate((x) => x * 2, 1, 5)    // [1, 2, 4, 8, 16]
+iterate((x) => x + 1, 0, 4)    // [0, 1, 2, 3]
+```
+
+**Signature:** `iterate(f, initial, n) -> List`
+
+### partition
+
+Split a list into elements that match and don't match a predicate.
+
+```setsuna
+partition((x) => x % 2 == 0, [1, 2, 3, 4, 5])  // ([2, 4], [1, 3, 5])
+```
+
+**Signature:** `partition(predicate, list) -> Tuple<List, List>`
+
+### enumerate
+
+Pair elements with their indices.
+
+```setsuna
+enumerate(["a", "b", "c"])    // [(0, "a"), (1, "b"), (2, "c")]
+```
+
+**Signature:** `enumerate(list) -> List<Tuple<Int, Value>>`
+
+### sort_desc
+
+Sort in descending order.
+
+```setsuna
+sort_desc([3, 1, 4, 1, 5])    // [5, 4, 3, 1, 1]
+```
+
+**Signature:** `sort_desc(list) -> List`
+
+### count
+
+Count elements satisfying a predicate.
+
+```setsuna
+count((x) => x > 2, [1, 2, 3, 4, 5])    // 3
+```
+
+**Signature:** `count(predicate, list) -> Int`
+
+### unique
+
+Remove duplicate elements (keeps first occurrence).
+
+```setsuna
+unique([1, 2, 1, 3, 2, 4])    // [1, 2, 3, 4]
+```
+
+**Signature:** `unique(list) -> List`
+
+### last
+
+Get the last element of a list.
+
+```setsuna
+last([1, 2, 3, 4, 5])    // 5
+```
+
+**Signature:** `last(list) -> Value`
+
+<Warning>
+`last` throws an error if the list is empty.
+</Warning>
+
+### init
+
+Get all elements except the last.
+
+```setsuna
+init([1, 2, 3, 4, 5])    // [1, 2, 3, 4]
+```
+
+**Signature:** `init(list) -> List`
+
+### span
+
+Split at the first element not satisfying the predicate.
+
+```setsuna
+span((x) => x < 4, [1, 2, 3, 4, 5])    // ([1, 2, 3], [4, 5])
+```
+
+**Signature:** `span(predicate, list) -> Tuple<List, List>`
+
+### group
+
+Group consecutive equal elements.
+
+```setsuna
+group([1, 1, 2, 2, 2, 3, 1])    // [[1, 1], [2, 2, 2], [3], [1]]
+```
+
+**Signature:** `group(list) -> List<List>`
+
+## List Comprehension Pattern
+
+While Setsuna doesn't have built-in list comprehensions, you can achieve similar results:
+
+```setsuna
+// [x * 2 for x in nums if x > 2] equivalent:
+fn comprehend(nums) {
+    map((x) => x * 2, filter((x) => x > 2, nums))
+}
+
+print(comprehend([1, 2, 3, 4, 5]))  // [6, 8, 10]
+```
+
+## Performance Considerations
+
+<Tip>
+**Efficiency Tips:**
+- Use `cons` for building lists (O(1)) instead of `append` (O(n))
+- Build lists in reverse order, then use `reverse` at the end
+- Use tail recursion for large list processing
+</Tip>
+
+```setsuna
+// Efficient: O(n)
+fn map_efficient(f, lst) {
+    fn helper(lst, acc) {
+        match lst {
+            [] => reverse(acc),
+            [h, ...t] => helper(t, cons(f(h), acc))
+        }
+    }
+    helper(lst, [])
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
+    Destructure lists with patterns
+  </Card>
+  <Card title="Functions" icon="function" href="/basics/functions">
+    Higher-order functions
+  </Card>
+</CardGroup>

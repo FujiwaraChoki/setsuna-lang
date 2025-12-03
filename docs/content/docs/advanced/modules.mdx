@@ -1,0 +1,299 @@
+---
+title: Modules
+description: Organizing code with modules in Setsuna
+---
+
+# Modules
+
+Modules let you organize code into namespaced units, making it easier to structure larger programs and avoid naming conflicts.
+
+## Defining Modules
+
+Use the `module` keyword to create a module:
+
+```setsuna
+module Math {
+    fn square(x) => x * x
+    fn cube(x) => x * x * x
+    fn abs(x) => if x < 0 { -x } else { x }
+}
+```
+
+## Using Module Members
+
+Access module members with dot notation:
+
+```setsuna
+print(Math.square(5))  // 25
+print(Math.cube(3))    // 27
+print(Math.abs(-10))   // 10
+```
+
+## Module Contents
+
+Modules can contain:
+
+### Functions
+
+```setsuna
+module StringUtils {
+    fn is_empty(s) => len(s) == 0
+    fn repeat(s, n) {
+        fn helper(acc, count) {
+            if count == 0 {
+                acc
+            } else {
+                helper(acc + s, count - 1)
+            }
+        }
+        helper("", n)
+    }
+}
+
+print(StringUtils.repeat("ab", 3))  // "ababab"
+```
+
+### Type Definitions
+
+```setsuna
+module Collections {
+    type Stack {
+        Empty,
+        Push(value, rest)
+    }
+
+    fn empty() => Empty
+
+    fn push(value, stack) => Push(value, stack)
+
+    fn pop(stack) {
+        match stack {
+            Empty => None,
+            Push(v, rest) => Some((v, rest))
+        }
+    }
+
+    fn peek(stack) {
+        match stack {
+            Empty => None,
+            Push(v, _) => Some(v)
+        }
+    }
+}
+
+let stack = Collections.Empty
+let stack = Collections.push(1, stack)
+let stack = Collections.push(2, stack)
+print(Collections.peek(stack))  // Some(2)
+```
+
+### Constants
+
+```setsuna
+module Constants {
+    let PI = 3.14159265359
+    let E = 2.71828182846
+    let PHI = 1.61803398875
+}
+
+print(Constants.PI)  // 3.14159...
+```
+
+## Nested Definitions
+
+Functions inside modules can call each other:
+
+```setsuna
+module Math {
+    fn square(x) => x * x
+
+    fn sum_of_squares(a, b) {
+        square(a) + square(b)  // Calls local square
+    }
+
+    fn distance(x1, y1, x2, y2) {
+        let dx = x2 - x1
+        let dy = y2 - y1
+        sqrt(sum_of_squares(dx, dy))
+    }
+}
+
+print(Math.distance(0, 0, 3, 4))  // 5.0
+```
+
+## Module Organization
+
+### Logical Grouping
+
+Group related functionality:
+
+```setsuna
+module List {
+    fn map(f, lst) {
+        match lst {
+            [] => [],
+            [h, ...t] => cons(f(h), map(f, t))
+        }
+    }
+
+    fn filter(pred, lst) {
+        match lst {
+            [] => [],
+            [h, ...t] => if pred(h) {
+                cons(h, filter(pred, t))
+            } else {
+                filter(pred, t)
+            }
+        }
+    }
+
+    fn fold(f, init, lst) {
+        match lst {
+            [] => init,
+            [h, ...t] => fold(f, f(init, h), t)
+        }
+    }
+
+    fn length(lst) => fold((acc, _) => acc + 1, 0, lst)
+
+    fn sum(lst) => fold((a, b) => a + b, 0, lst)
+
+    fn product(lst) => fold((a, b) => a * b, 1, lst)
+}
+```
+
+### Domain Modules
+
+Organize by domain concept:
+
+```setsuna
+module User {
+    type Status {
+        Active,
+        Inactive,
+        Banned(reason)
+    }
+
+    fn create(name, email) {
+        { name: name, email: email, status: Active }
+    }
+
+    fn is_active(user) {
+        match user.status {
+            Active => true,
+            _ => false
+        }
+    }
+
+    fn ban(user, reason) {
+        { name: user.name, email: user.email, status: Banned(reason) }
+    }
+}
+
+let user = User.create("Alice", "alice@example.com")
+print(User.is_active(user))  // true
+```
+
+## Example: Complete Module
+
+```setsuna
+module Option {
+    type T {
+        Some(value),
+        None
+    }
+
+    fn is_some(opt) {
+        match opt {
+            Some(_) => true,
+            None => false
+        }
+    }
+
+    fn is_none(opt) => !is_some(opt)
+
+    fn unwrap(opt) {
+        match opt {
+            Some(x) => x,
+            None => error("unwrap called on None")
+        }
+    }
+
+    fn unwrap_or(opt, default) {
+        match opt {
+            Some(x) => x,
+            None => default
+        }
+    }
+
+    fn map(f, opt) {
+        match opt {
+            Some(x) => Some(f(x)),
+            None => None
+        }
+    }
+
+    fn flat_map(f, opt) {
+        match opt {
+            Some(x) => f(x),
+            None => None
+        }
+    }
+
+    fn filter(pred, opt) {
+        match opt {
+            Some(x) => if pred(x) { Some(x) } else { None },
+            None => None
+        }
+    }
+}
+
+// Usage
+let value = Option.Some(42)
+let doubled = Option.map((x) => x * 2, value)
+print(Option.unwrap_or(doubled, 0))  // 84
+```
+
+## Best Practices
+
+<Tip>
+**Module Design Tips:**
+- Keep modules focused on a single responsibility
+- Use descriptive names that reflect the module's purpose
+- Group related types and functions together
+- Expose a clean API; hide implementation details
+</Tip>
+
+### Module Naming
+
+```setsuna
+// Good - clear, descriptive names
+module StringUtils { ... }
+module MathOperations { ... }
+module UserService { ... }
+
+// Avoid - vague names
+module Utils { ... }
+module Helpers { ... }
+module Misc { ... }
+```
+
+## Current Limitations
+
+<Warning>
+The current Setsuna implementation has these module limitations:
+- No separate module files (all modules in one file)
+- No private/public access control
+- No module imports or re-exports
+</Warning>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Records" icon="rectangle-list" href="/advanced/records">
+    Organize data with records
+  </Card>
+  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
+    Explore the standard library
+  </Card>
+</CardGroup>

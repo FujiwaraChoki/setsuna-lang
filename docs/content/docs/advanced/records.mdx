@@ -1,0 +1,294 @@
+---
+title: Records
+description: Working with records in Setsuna
+---
+
+# Records
+
+Records are collections of named fields, similar to structs in other languages. They're ideal for grouping related data together.
+
+## Creating Records
+
+Use curly braces with `field: value` pairs:
+
+```setsuna
+let person = {
+    name: "Alice",
+    age: 30,
+    city: "Tokyo"
+}
+```
+
+### Inline Records
+
+```setsuna
+let point = { x: 10, y: 20 }
+let config = { debug: true, maxRetries: 3 }
+```
+
+## Accessing Fields
+
+Use dot notation to access fields:
+
+```setsuna
+let person = { name: "Alice", age: 30 }
+
+print(person.name)  // "Alice"
+print(person.age)   // 30
+```
+
+## Records in Functions
+
+### As Parameters
+
+```setsuna
+fn greet(person) {
+    print("Hello, " + person.name + "!")
+}
+
+fn describe(person) {
+    person.name + " is " + str(person.age) + " years old"
+}
+
+let alice = { name: "Alice", age: 30 }
+greet(alice)              // Hello, Alice!
+print(describe(alice))    // Alice is 30 years old
+```
+
+### As Return Values
+
+```setsuna
+fn make_point(x, y) {
+    { x: x, y: y }
+}
+
+fn make_person(name, age) {
+    { name: name, age: age, created_at: "now" }
+}
+
+let p = make_point(10, 20)
+print(p.x)  // 10
+```
+
+## Pattern Matching on Records
+
+Extract fields using pattern matching:
+
+```setsuna
+fn process(person) {
+    match person {
+        { name: n, age: a } => {
+            print("Name: " + n)
+            print("Age: " + str(a))
+        }
+    }
+}
+```
+
+### Partial Matching
+
+You don't need to match all fields:
+
+```setsuna
+let person = { name: "Alice", age: 30, city: "Tokyo", country: "Japan" }
+
+// Only match the fields you need
+match person {
+    { name: n } => print("Hello, " + n)
+}
+
+// Match multiple specific fields
+match person {
+    { city: c, country: co } => print("Lives in " + c + ", " + co)
+}
+```
+
+### With Guards
+
+```setsuna
+fn classify_person(person) {
+    match person {
+        { age: a } if a < 18 => "minor",
+        { age: a } if a < 65 => "adult",
+        { age: a } => "senior"
+    }
+}
+```
+
+## Nested Records
+
+Records can contain other records:
+
+```setsuna
+let employee = {
+    name: "Alice",
+    department: {
+        name: "Engineering",
+        floor: 3
+    },
+    contact: {
+        email: "alice@company.com",
+        phone: "555-1234"
+    }
+}
+
+print(employee.department.name)  // "Engineering"
+print(employee.contact.email)    // "alice@company.com"
+```
+
+### Nested Pattern Matching
+
+```setsuna
+fn get_dept_floor(employee) {
+    match employee {
+        { department: { floor: f } } => f
+    }
+}
+
+print(get_dept_floor(employee))  // 3
+```
+
+## Records with Other Types
+
+### Records in Lists
+
+```setsuna
+let people = [
+    { name: "Alice", age: 30 },
+    { name: "Bob", age: 25 },
+    { name: "Charlie", age: 35 }
+]
+
+// Map over records
+fn get_names(people) {
+    fn helper(lst, acc) {
+        match lst {
+            [] => reverse(acc),
+            [p, ...rest] => helper(rest, cons(p.name, acc))
+        }
+    }
+    helper(people, [])
+}
+
+print(get_names(people))  // ["Alice", "Bob", "Charlie"]
+```
+
+### Records in Tuples
+
+```setsuna
+let entry = ({ name: "Alice" }, 100)
+
+// Access tuple element, then record field
+print(entry.0.name)  // "Alice"
+```
+
+## Common Patterns
+
+### Builder Pattern
+
+```setsuna
+fn make_config() {
+    { debug: false, port: 8080, host: "localhost" }
+}
+
+fn with_debug(config) {
+    { debug: true, port: config.port, host: config.host }
+}
+
+fn with_port(config, port) {
+    { debug: config.debug, port: port, host: config.host }
+}
+
+let config = make_config()
+let config = with_debug(config)
+let config = with_port(config, 3000)
+
+print(config.debug)  // true
+print(config.port)   // 3000
+```
+
+### Data Transformation
+
+```setsuna
+fn transform_person(person) {
+    {
+        full_name: person.first_name + " " + person.last_name,
+        birth_year: 2024 - person.age
+    }
+}
+
+let input = { first_name: "Alice", last_name: "Smith", age: 30 }
+let output = transform_person(input)
+print(output.full_name)   // "Alice Smith"
+print(output.birth_year)  // 1994
+```
+
+### Validation
+
+```setsuna
+type ValidationResult {
+    Valid(data),
+    Invalid(errors)
+}
+
+fn validate_person(person) {
+    let errors = []
+
+    let errors = if len(person.name) == 0 {
+        cons("Name is required", errors)
+    } else { errors }
+
+    let errors = if person.age < 0 {
+        cons("Age must be positive", errors)
+    } else { errors }
+
+    if empty(errors) {
+        Valid(person)
+    } else {
+        Invalid(errors)
+    }
+}
+```
+
+## Best Practices
+
+<Tip>
+**Record Design Tips:**
+- Use descriptive field names
+- Keep records focused (single responsibility)
+- Prefer immutable transformations over mutation
+- Use records for data, ADTs for behavior variants
+</Tip>
+
+### When to Use Records vs Tuples
+
+| Use Records When | Use Tuples When |
+|-----------------|-----------------|
+| Fields have semantic meaning | Position has meaning |
+| Many fields | 2-3 elements |
+| Self-documenting code | Quick, local grouping |
+| Domain objects | Function returns |
+
+```setsuna
+// Record - clear what each field means
+let person = { name: "Alice", age: 30 }
+
+// Tuple - position matters (x, y)
+let point = (10, 20)
+
+// Tuple - multiple return values
+fn divide_with_remainder(a, b) {
+    (a / b, a % b)
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
+    Advanced pattern matching with records
+  </Card>
+  <Card title="Modules" icon="boxes-stacked" href="/advanced/modules">
+    Organize records in modules
+  </Card>
+</CardGroup>

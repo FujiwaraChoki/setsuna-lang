@@ -1,0 +1,129 @@
+---
+title: Installation
+description: How to install Setsuna on your system
+---
+
+# Installation
+
+Setsuna can be built from source on any platform with a C++17 compiler.
+
+## Requirements
+
+| Requirement | Minimum Version |
+|-------------|-----------------|
+| C++ Compiler | C++17 support (GCC 8+, Clang 7+, MSVC 2019+) |
+| CMake | 3.16+ |
+| Make | Any recent version |
+
+## Building from Source
+
+### Linux / macOS
+
+```bash
+# Clone the repository
+git clone https://github.com/FujiwaraChoki/setsuna-lang.git
+cd setsuna-lang
+
+# Create build directory
+mkdir build && cd build
+
+# Configure and build
+cmake ..
+make -j$(nproc)
+
+# Optional: Install system-wide
+sudo make install
+```
+
+### Windows
+
+Using Visual Studio:
+
+```powershell
+# Clone the repository
+git clone https://github.com/FujiwaraChoki/setsuna-lang.git
+cd setsuna-lang
+
+# Create build directory
+mkdir build
+cd build
+
+# Configure with CMake
+cmake ..
+
+# Build with MSBuild
+cmake --build . --config Release
+```
+
+## Verifying Installation
+
+After building, verify the installation:
+
+```bash
+./setsuna --help
+```
+
+You should see:
+
+```
+Setsuna Programming Language v0.1.0
+
+Usage:
+  setsuna              Start REPL
+  setsuna <file.stsn>  Run a file
+  setsuna --help       Show this message
+```
+
+## Project Structure
+
+After building, your project structure should look like:
+
+```
+setsuna-lang/
+├── build/
+│   └── setsuna          # The compiled interpreter
+├── src/                 # Source files
+├── examples/            # Example .stsn programs
+├── docs/                # Documentation
+└── CMakeLists.txt
+```
+
+## Running Examples
+
+Test your installation by running the included examples:
+
+```bash
+./build/setsuna examples/factorial.stsn
+./build/setsuna examples/fibonacci.stsn
+./build/setsuna examples/list_ops.stsn
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="CMake version too old">
+    If you get CMake errors, ensure you have version 3.16 or higher:
+    ```bash
+    cmake --version
+    ```
+    Update CMake through your package manager or download from cmake.org.
+  </Accordion>
+
+  <Accordion title="Compiler doesn't support C++17">
+    Setsuna requires C++17. Check your compiler version:
+    ```bash
+    g++ --version  # GCC
+    clang++ --version  # Clang
+    ```
+    Update to a recent version if needed.
+  </Accordion>
+
+  <Accordion title="Build fails on Windows">
+    Ensure Visual Studio 2019 or later is installed with C++ development tools.
+    Use the "Developer Command Prompt" for building.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+Once installed, head to the [Quickstart](/quickstart) guide to write your first program!

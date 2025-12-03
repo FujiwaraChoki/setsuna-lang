@@ -8,7 +8,14 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:mintlify.com)",
       "Bash(./setsuna:*)",
-      "Bash(sudo make:*)"
+      "Bash(sudo make:*)",
+      "Bash(mkdir:*)",
+      "Bash(cmake:*)",
+      "WebFetch(domain:www.next-forge.com)",
+      "Bash(mv:*)",
+      "Bash(bun create fumadocs-app)",
+      "Bash(bun create:*)",
+      "Bash(../build/setsuna print.stsn:*)"
     ],
     "deny": [],
     "ask": []

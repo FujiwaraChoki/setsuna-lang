@@ -1,0 +1,150 @@
+---
+title: Quickstart
+description: Get up and running with Setsuna in minutes
+---
+
+# Quickstart
+
+This guide will help you write and run your first Setsuna program in just a few minutes.
+
+## Prerequisites
+
+- C++17 compatible compiler (GCC, Clang, or MSVC)
+- CMake 3.16 or higher
+
+## Building Setsuna
+
+<Steps>
+### Clone the repository
+
+```bash
+git clone https://github.com/FujiwaraChoki/setsuna-lang.git
+cd setsuna-lang
+```
+
+### Build with CMake
+
+```bash
+mkdir build && cd build
+cmake ..
+make
+```
+
+### Verify installation
+
+```bash
+./setsuna --help
+```
+</Steps>
+
+## Your First Program
+
+Create a file called `hello.stsn`:
+
+```setsuna
+// hello.stsn - Your first Setsuna program
+
+fn greet(name) {
+    print("Hello, " + name + "!")
+}
+
+greet("World")
+greet("Setsuna")
+```
+
+Run it:
+
+```bash
+./setsuna hello.stsn
+```
+
+Output:
+```
+Hello, World!
+Hello, Setsuna!
+```
+
+## Using the REPL
+
+Setsuna includes an interactive REPL (Read-Eval-Print Loop) for quick experimentation:
+
+```bash
+./setsuna
+```
+
+```
+Setsuna v0.1.0 - Functional Programming Language
+Type expressions to evaluate. Type 'exit' or Ctrl+D to quit.
+
+>> let x = 42
+=> 42
+>> x * 2
+=> 84
+>> fn double(n) => n * 2
+=> <fn>
+>> double(21)
+=> 42
+>> exit
+Goodbye!
+```
+
+## A More Complete Example
+
+Here's a program that demonstrates several Setsuna features:
+
+```setsuna
+// fibonacci.stsn
+
+// Efficient tail-recursive fibonacci
+fn fib(n) {
+    fn helper(n, a, b) {
+        match n {
+            0 => a,
+            _ => helper(n - 1, b, a + b)
+        }
+    }
+    helper(n, 0, 1)
+}
+
+// Generate a list of fibonacci numbers
+fn fib_list(count) {
+    fn build(i, acc) {
+        if i >= count {
+            reverse(acc)
+        } else {
+            build(i + 1, cons(fib(i), acc))
+        }
+    }
+    build(0, [])
+}
+
+// Print results
+print("First 10 Fibonacci numbers:")
+print(fib_list(10))
+
+print("Fibonacci(20):")
+print(fib(20))
+```
+
+Run it:
+
+```bash
+./setsuna fibonacci.stsn
+```
+
+Output:
+```
+First 10 Fibonacci numbers:
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+Fibonacci(20):
+6765
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Variables & Types" href="/basics/variables" />
+  <Card title="Functions" href="/basics/functions" />
+  <Card title="Pattern Matching" href="/advanced/pattern-matching" />
+  <Card title="Built-in Functions" href="/reference/builtins" />
+</Cards>
