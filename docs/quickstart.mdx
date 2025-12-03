@@ -1,0 +1,156 @@
+---
+title: Quickstart
+description: Get up and running with Setsuna in minutes
+---
+
+# Quickstart
+
+This guide will help you write and run your first Setsuna program in just a few minutes.
+
+## Prerequisites
+
+- C++17 compatible compiler (GCC, Clang, or MSVC)
+- CMake 3.16 or higher
+
+## Building Setsuna
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/FujiwaraChoki/setsuna-lang.git
+    cd setsuna-lang
+    ```
+  </Step>
+  <Step title="Build with CMake">
+    ```bash
+    mkdir build && cd build
+    cmake ..
+    make
+    ```
+  </Step>
+  <Step title="Verify installation">
+    ```bash
+    ./setsuna --help
+    ```
+  </Step>
+</Steps>
+
+## Your First Program
+
+Create a file called `hello.stsn`:
+
+```setsuna
+// hello.stsn - Your first Setsuna program
+
+fn greet(name) {
+    print("Hello, " + name + "!")
+}
+
+greet("World")
+greet("Setsuna")
+```
+
+Run it:
+
+```bash
+./setsuna hello.stsn
+```
+
+Output:
+```
+Hello, World!
+Hello, Setsuna!
+```
+
+## Using the REPL
+
+Setsuna includes an interactive REPL (Read-Eval-Print Loop) for quick experimentation:
+
+```bash
+./setsuna
+```
+
+```
+Setsuna v0.1.0 - Functional Programming Language
+Type expressions to evaluate. Type 'exit' or Ctrl+D to quit.
+
+>> let x = 42
+=> 42
+>> x * 2
+=> 84
+>> fn double(n) => n * 2
+=> <fn>
+>> double(21)
+=> 42
+>> exit
+Goodbye!
+```
+
+## A More Complete Example
+
+Here's a program that demonstrates several Setsuna features:
+
+```setsuna
+// fibonacci.stsn
+
+// Efficient tail-recursive fibonacci
+fn fib(n) {
+    fn helper(n, a, b) {
+        match n {
+            0 => a,
+            _ => helper(n - 1, b, a + b)
+        }
+    }
+    helper(n, 0, 1)
+}
+
+// Generate a list of fibonacci numbers
+fn fib_list(count) {
+    fn build(i, acc) {
+        if i >= count {
+            reverse(acc)
+        } else {
+            build(i + 1, cons(fib(i), acc))
+        }
+    }
+    build(0, [])
+}
+
+// Print results
+print("First 10 Fibonacci numbers:")
+print(fib_list(10))
+
+print("Fibonacci(20):")
+print(fib(20))
+```
+
+Run it:
+
+```bash
+./setsuna fibonacci.stsn
+```
+
+Output:
+```
+First 10 Fibonacci numbers:
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+Fibonacci(20):
+6765
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Variables & Types" icon="box" href="/basics/variables">
+    Learn about Setsuna's data types and variable bindings
+  </Card>
+  <Card title="Functions" icon="function" href="/basics/functions">
+    Explore functions, lambdas, and closures
+  </Card>
+  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
+    Master Setsuna's powerful pattern matching
+  </Card>
+  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
+    Browse the standard library
+  </Card>
+</CardGroup>

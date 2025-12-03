@@ -1,0 +1,66 @@
+---
+title: Introduction
+description: Welcome to Setsuna - A functional programming language
+---
+
+# Welcome to Setsuna
+
+Setsuna is a modern functional programming language written in C++ with a clean, expressive syntax inspired by ML-family languages while maintaining familiar C-style conventions.
+
+## Why Setsuna?
+
+<CardGroup cols={2}>
+  <Card title="Functional First" icon="function">
+    First-class functions, closures, and higher-order functions make functional programming natural and intuitive.
+  </Card>
+  <Card title="Pattern Matching" icon="puzzle-piece">
+    Powerful pattern matching with destructuring for lists, tuples, records, and algebraic data types.
+  </Card>
+  <Card title="Type Inference" icon="wand-magic-sparkles">
+    Hindley-Milner type inference means less boilerplate while maintaining type safety.
+  </Card>
+  <Card title="Clean Syntax" icon="code">
+    C-style syntax that's familiar yet expressive, with arrow functions and match expressions.
+  </Card>
+</CardGroup>
+
+## Quick Example
+
+```setsuna
+// Define a recursive function
+fn factorial(n) {
+    match n {
+        0 => 1,
+        _ => n * factorial(n - 1)
+    }
+}
+
+// Higher-order functions
+fn map(f, lst) {
+    match lst {
+        [] => [],
+        [head, ...tail] => cons(f(head), map(f, tail))
+    }
+}
+
+// Use them together
+let numbers = [1, 2, 3, 4, 5]
+let factorials = map(factorial, numbers)
+print(factorials)  // [1, 2, 6, 24, 120]
+```
+
+## Features
+
+- **Rich Data Types**: Integers, floats, booleans, strings, lists, tuples, and records
+- **Algebraic Data Types**: Define custom types with multiple constructors
+- **Modules**: Organize code into reusable namespaced modules
+- **REPL**: Interactive development with immediate feedback
+- **Pattern Matching**: Destructure and match against complex data structures
+
+## File Extension
+
+Setsuna source files use the `.stsn` extension.
+
+## Getting Started
+
+Ready to dive in? Head to the [Quickstart](/quickstart) guide to write your first Setsuna program.

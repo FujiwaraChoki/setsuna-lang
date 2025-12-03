@@ -1,0 +1,38 @@
+// Records and pattern matching in Setsuna
+
+// Create person records
+let alice = { name: "Alice", age: 30, city: "Tokyo" }
+let bob = { name: "Bob", age: 25, city: "Osaka" }
+
+print("Alice:")
+print(alice)
+
+print("Alice's name:")
+print(alice.name)
+
+print("Alice's age:")
+print(alice.age)
+
+// Function that works with records
+fn greet(person) {
+    print("Hello, " + person.name + " from " + person.city + "!")
+}
+
+greet(alice)
+greet(bob)
+
+// Pattern matching on records
+fn describe_age(person) {
+    match person {
+        { age: a } => if a < 18 {
+            "young"
+        } else if a < 60 {
+            "adult"
+        } else {
+            "senior"
+        }
+    }
+}
+
+print("Alice is:")
+print(describe_age(alice))

@@ -1,0 +1,332 @@
+// Setsuna Standard Library Prelude
+// Higher-order functions and list utilities
+
+// ============ Core Higher-Order Functions ============
+
+// map(f, list) - Apply function to each element
+fn map(f, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => cons(f(h), map(f, t))
+    }
+}
+
+// filter(pred, list) - Keep elements where predicate is true
+fn filter(pred, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => if pred(h) {
+            cons(h, filter(pred, t))
+        } else {
+            filter(pred, t)
+        }
+    }
+}
+
+// fold(f, init, list) - Left fold / reduce
+fn fold(f, acc, lst) {
+    match lst {
+        [] => acc,
+        [h, ...t] => fold(f, f(acc, h), t)
+    }
+}
+
+// reduce(f, list) - Fold without initial value (uses first element)
+fn reduce(f, lst) {
+    match lst {
+        [] => error("reduce: empty list"),
+        [h, ...t] => fold(f, h, t)
+    }
+}
+
+// fold_right(f, init, list) - Right fold
+fn fold_right(f, acc, lst) {
+    match lst {
+        [] => acc,
+        [h, ...t] => f(h, fold_right(f, acc, t))
+    }
+}
+
+// ============ List Slicing ============
+
+// take(n, list) - Take first n elements
+fn take(n, lst) {
+    if n <= 0 {
+        []
+    } else {
+        match lst {
+            [] => [],
+            [h, ...t] => cons(h, take(n - 1, t))
+        }
+    }
+}
+
+// drop(n, list) - Drop first n elements
+fn drop(n, lst) {
+    if n <= 0 {
+        lst
+    } else {
+        match lst {
+            [] => [],
+            [_, ...t] => drop(n - 1, t)
+        }
+    }
+}
+
+// take_while(pred, list) - Take elements while predicate is true
+fn take_while(pred, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => if pred(h) {
+            cons(h, take_while(pred, t))
+        } else {
+            []
+        }
+    }
+}
+
+// drop_while(pred, list) - Drop elements while predicate is true
+fn drop_while(pred, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => if pred(h) {
+            drop_while(pred, t)
+        } else {
+            lst
+        }
+    }
+}
+
+// ============ Zipping ============
+
+// zip(list1, list2) - Combine two lists into list of tuples
+fn zip(lst1, lst2) {
+    match lst1 {
+        [] => [],
+        [h1, ...t1] => match lst2 {
+            [] => [],
+            [h2, ...t2] => cons((h1, h2), zip(t1, t2))
+        }
+    }
+}
+
+// zip_with(f, list1, list2) - Combine two lists using function
+fn zip_with(f, lst1, lst2) {
+    match lst1 {
+        [] => [],
+        [h1, ...t1] => match lst2 {
+            [] => [],
+            [h2, ...t2] => cons(f(h1, h2), zip_with(f, t1, t2))
+        }
+    }
+}
+
+// unzip(list_of_tuples) - Split list of tuples into tuple of lists
+fn unzip(lst) {
+    fn go(lst, acc1, acc2) {
+        match lst {
+            [] => (reverse(acc1), reverse(acc2)),
+            [(a, b), ...t] => go(t, cons(a, acc1), cons(b, acc2))
+        }
+    }
+    go(lst, [], [])
+}
+
+// ============ Predicates ============
+
+// any(pred, list) - True if any element satisfies predicate
+fn any(pred, lst) {
+    match lst {
+        [] => false,
+        [h, ...t] => if pred(h) { true } else { any(pred, t) }
+    }
+}
+
+// all(pred, list) - True if all elements satisfy predicate
+fn all(pred, lst) {
+    match lst {
+        [] => true,
+        [h, ...t] => if pred(h) { all(pred, t) } else { false }
+    }
+}
+
+// none(pred, list) - True if no elements satisfy predicate
+fn none(pred, lst) => !any(pred, lst)
+
+// ============ Searching ============
+
+// find(pred, list) - Find first element satisfying predicate, or unit
+fn find(pred, lst) {
+    match lst {
+        [] => (),
+        [h, ...t] => if pred(h) { h } else { find(pred, t) }
+    }
+}
+
+// find_index(pred, list) - Find index of first element satisfying predicate, or -1
+fn find_index(pred, lst) {
+    fn go(lst, i) {
+        match lst {
+            [] => -1,
+            [h, ...t] => if pred(h) { i } else { go(t, i + 1) }
+        }
+    }
+    go(lst, 0)
+}
+
+// ============ List Transformations ============
+
+// flatten(list_of_lists) - Flatten one level of nesting
+fn flatten(lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => concat(h, flatten(t))
+    }
+}
+
+// flat_map(f, list) - Map then flatten
+fn flat_map(f, lst) => flatten(map(f, lst))
+
+// intersperse(sep, list) - Insert separator between elements
+fn intersperse(sep, lst) {
+    match lst {
+        [] => [],
+        [x] => [x],
+        [h, ...t] => cons(h, cons(sep, intersperse(sep, t)))
+    }
+}
+
+// ============ Aggregation ============
+
+// sum(list) - Sum of numbers
+fn sum(lst) => fold((a, b) => a + b, 0, lst)
+
+// product(list) - Product of numbers
+fn product(lst) => fold((a, b) => a * b, 1, lst)
+
+// maximum(list) - Maximum element
+fn maximum(lst) {
+    match lst {
+        [] => error("maximum: empty list"),
+        [h, ...t] => fold(max, h, t)
+    }
+}
+
+// minimum(list) - Minimum element
+fn minimum(lst) {
+    match lst {
+        [] => error("minimum: empty list"),
+        [h, ...t] => fold(min, h, t)
+    }
+}
+
+// ============ Function Composition ============
+
+// compose(f, g) - Compose f after g: (f . g)(x) = f(g(x))
+fn compose(f, g) => (x) => f(g(x))
+
+// pipe(f, g) - Pipe g after f: (f |> g)(x) = g(f(x))
+fn pipe(f, g) => (x) => g(f(x))
+
+// identity(x) - Identity function
+fn identity(x) => x
+
+// constant(x) - Returns a function that always returns x
+fn constant(x) => (_) => x
+
+// flip(f) - Flip the order of arguments
+fn flip(f) => (a, b) => f(b, a)
+
+// ============ Utility ============
+
+// replicate(n, x) - Create list of n copies of x
+fn replicate(n, x) {
+    if n <= 0 {
+        []
+    } else {
+        cons(x, replicate(n - 1, x))
+    }
+}
+
+// iterate(f, x, n) - Apply f n times starting from x, collecting results
+fn iterate(f, x, n) {
+    if n <= 0 {
+        []
+    } else {
+        cons(x, iterate(f, f(x), n - 1))
+    }
+}
+
+// partition(pred, list) - Split list into (matching, non-matching)
+fn partition(pred, lst) => (filter(pred, lst), filter((x) => !pred(x), lst))
+
+// enumerate(list) - Pair elements with their indices
+fn enumerate(lst) {
+    fn go(lst, i) {
+        match lst {
+            [] => [],
+            [h, ...t] => cons((i, h), go(t, i + 1))
+        }
+    }
+    go(lst, 0)
+}
+
+// sort_desc(list) - Sort in descending order
+fn sort_desc(lst) => reverse(sort(lst))
+
+// count(pred, list) - Count elements satisfying predicate
+fn count(pred, lst) => len(filter(pred, lst))
+
+// unique(list) - Remove duplicates (preserves first occurrence)
+fn unique(lst) {
+    fn contains_elem(lst, x) {
+        match lst {
+            [] => false,
+            [h, ...t] => if h == x { true } else { contains_elem(t, x) }
+        }
+    }
+    fn go(lst, seen) {
+        match lst {
+            [] => [],
+            [h, ...t] => if contains_elem(seen, h) {
+                go(t, seen)
+            } else {
+                cons(h, go(t, append(seen, h)))
+            }
+        }
+    }
+    go(lst, [])
+}
+
+// last(list) - Get last element
+fn last(lst) {
+    match lst {
+        [] => error("last: empty list"),
+        [x] => x,
+        [_, ...t] => last(t)
+    }
+}
+
+// init(list) - Get all but last element
+fn init(lst) {
+    match lst {
+        [] => error("init: empty list"),
+        [_] => [],
+        [h, ...t] => cons(h, init(t))
+    }
+}
+
+// span(pred, list) - Split at first element not satisfying predicate
+fn span(pred, lst) => (take_while(pred, lst), drop_while(pred, lst))
+
+// group(list) - Group consecutive equal elements
+fn group(lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => {
+            let same = take_while((x) => x == h, t)
+            let rest = drop_while((x) => x == h, t)
+            cons(cons(h, same), group(rest))
+        }
+    }
+}

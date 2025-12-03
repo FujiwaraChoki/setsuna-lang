@@ -1,0 +1,237 @@
+---
+title: Control Flow
+description: Conditionals and control flow in Setsuna
+---
+
+# Control Flow
+
+Setsuna provides expressive control flow constructs that are all expressions, meaning they return values.
+
+## If Expressions
+
+The `if` expression evaluates a condition and returns one of two values:
+
+```setsuna
+let x = 10
+let result = if x > 5 { "big" } else { "small" }
+print(result)  // "big"
+```
+
+### Basic Syntax
+
+```setsuna
+if condition {
+    // then branch
+} else {
+    // else branch
+}
+```
+
+### Else-If Chains
+
+```setsuna
+fn grade(score) {
+    if score >= 90 {
+        "A"
+    } else if score >= 80 {
+        "B"
+    } else if score >= 70 {
+        "C"
+    } else if score >= 60 {
+        "D"
+    } else {
+        "F"
+    }
+}
+
+print(grade(85))  // "B"
+print(grade(72))  // "C"
+```
+
+<Note>
+Since `if` is an expression, both branches must return compatible types.
+</Note>
+
+### Without Else
+
+If you omit the `else` branch, the expression returns `()` (unit) when the condition is false:
+
+```setsuna
+let x = 10
+if x > 20 {
+    print("x is big")
+}
+// Returns () if condition is false
+```
+
+## Match Expressions
+
+Pattern matching is the preferred way to handle multiple cases:
+
+```setsuna
+fn describe(n) {
+    match n {
+        0 => "zero",
+        1 => "one",
+        2 => "two",
+        _ => "many"
+    }
+}
+
+print(describe(0))  // "zero"
+print(describe(5))  // "many"
+```
+
+See [Pattern Matching](/advanced/pattern-matching) for comprehensive coverage.
+
+## Blocks as Expressions
+
+Blocks `{ ... }` are expressions that return their last value:
+
+```setsuna
+let result = {
+    let a = 10
+    let b = 20
+    a + b  // This value is returned
+}
+print(result)  // 30
+```
+
+### Nested Blocks
+
+```setsuna
+let value = {
+    let x = {
+        let inner = 5
+        inner * 2
+    }
+    x + 10
+}
+print(value)  // 20
+```
+
+## Boolean Operators
+
+### Short-Circuit Evaluation
+
+`&&` and `||` use short-circuit evaluation:
+
+```setsuna
+// && stops if first is false
+let result = false && expensive_function()  // expensive_function not called
+
+// || stops if first is true
+let result = true || expensive_function()   // expensive_function not called
+```
+
+### Logical Operations
+
+```setsuna
+let a = true
+let b = false
+
+print(a && b)   // false
+print(a || b)   // true
+print(!a)       // false
+print(!b)       // true
+```
+
+## Comparison Operators
+
+| Operator | Description |
+|----------|-------------|
+| `==` | Equal |
+| `!=` | Not equal |
+| `<` | Less than |
+| `>` | Greater than |
+| `<=` | Less than or equal |
+| `>=` | Greater than or equal |
+
+```setsuna
+print(5 == 5)   // true
+print(5 != 3)   // true
+print(3 < 5)    // true
+print(5 > 3)    // true
+print(3 <= 3)   // true
+print(5 >= 5)   // true
+```
+
+## Common Patterns
+
+### Guard Clauses
+
+Use early returns via pattern matching:
+
+```setsuna
+fn process(value) {
+    match value {
+        0 => "cannot process zero",
+        n if n < 0 => "cannot process negative",
+        n => "processing: " + str(n)
+    }
+}
+```
+
+### Conditional Assignment
+
+```setsuna
+let status = if is_valid { "ok" } else { "error" }
+
+let message = match code {
+    200 => "Success",
+    404 => "Not Found",
+    500 => "Server Error",
+    _ => "Unknown"
+}
+```
+
+### Recursive Conditionals
+
+```setsuna
+fn find_first_positive(lst) {
+    match lst {
+        [] => None,
+        [h, ...t] => if h > 0 {
+            Some(h)
+        } else {
+            find_first_positive(t)
+        }
+    }
+}
+```
+
+## Everything is an Expression
+
+In Setsuna, there are no statements—everything is an expression that produces a value:
+
+```setsuna
+// if is an expression
+let a = if true { 1 } else { 2 }
+
+// match is an expression
+let b = match a {
+    1 => "one",
+    _ => "other"
+}
+
+// blocks are expressions
+let c = {
+    let x = 10
+    let y = 20
+    x + y
+}
+
+// function body is an expression
+fn get_value() => if true { 42 } else { 0 }
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
+    Deep dive into pattern matching
+  </Card>
+  <Card title="Functions" icon="function" href="/basics/functions">
+    Learn about function definitions
+  </Card>
+</CardGroup>

@@ -1,0 +1,13 @@
+// Factorial example in Setsuna
+
+fn factorial(n) {
+    match n {
+        0 => 1,
+        _ => n * factorial(n - 1)
+    }
+}
+
+// Calculate factorial of 10
+let result = factorial(10)
+print("Factorial of 10:")
+print(result)

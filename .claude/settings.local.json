@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(make:*)",
+      "Bash(./build/setsuna:*)",
+      "WebFetch(domain:www.mintlify.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:mintlify.com)",
+      "Bash(./setsuna:*)",
+      "Bash(sudo make:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

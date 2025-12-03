@@ -1,0 +1,398 @@
+---
+title: Operators
+description: Complete operator reference for Setsuna
+---
+
+# Operators
+
+Setsuna provides a comprehensive set of operators for arithmetic, comparison, logical operations, and more.
+
+## Operator Precedence
+
+From highest to lowest precedence:
+
+| Precedence | Operators | Associativity |
+|------------|-----------|---------------|
+| 1 | `.` (field access) | Left |
+| 2 | `()` (function call) | Left |
+| 3 | `!` `-` (unary) | Right |
+| 4 | `*` `/` `%` | Left |
+| 5 | `+` `-` | Left |
+| 6 | `<` `>` `<=` `>=` | Left |
+| 7 | `==` `!=` | Left |
+| 8 | `&&` | Left |
+| 9 | `\|\|` | Left |
+| 10 | `=>` (arrow) | Right |
+
+## Arithmetic Operators
+
+### Addition `+`
+
+```setsuna
+5 + 3        // 8
+2.5 + 1.5    // 4.0
+"Hello" + " " + "World"  // "Hello World" (string concatenation)
+```
+
+### Subtraction `-`
+
+```setsuna
+10 - 3       // 7
+5.5 - 2.0    // 3.5
+```
+
+### Multiplication `*`
+
+```setsuna
+4 * 5        // 20
+2.5 * 3      // 7.5
+```
+
+### Division `/`
+
+```setsuna
+10 / 3       // 3.333...
+15 / 5       // 3.0
+7.5 / 2.5    // 3.0
+```
+
+<Note>
+Division always produces a float result, even with integer operands.
+</Note>
+
+### Modulo `%`
+
+```setsuna
+10 % 3       // 1
+17 % 5       // 2
+-10 % 3      // -1
+```
+
+### Unary Minus `-`
+
+```setsuna
+let x = 5
+let y = -x   // -5
+-(-10)       // 10
+```
+
+## Comparison Operators
+
+### Equality `==`
+
+```setsuna
+5 == 5       // true
+5 == 3       // false
+"a" == "a"   // true
+true == true // true
+[1, 2] == [1, 2]  // true (structural equality)
+```
+
+### Inequality `!=`
+
+```setsuna
+5 != 3       // true
+5 != 5       // false
+"a" != "b"   // true
+```
+
+### Less Than `<`
+
+```setsuna
+3 < 5        // true
+5 < 3        // false
+5 < 5        // false
+```
+
+### Greater Than `>`
+
+```setsuna
+5 > 3        // true
+3 > 5        // false
+5 > 5        // false
+```
+
+### Less Than or Equal `<=`
+
+```setsuna
+3 <= 5       // true
+5 <= 5       // true
+6 <= 5       // false
+```
+
+### Greater Than or Equal `>=`
+
+```setsuna
+5 >= 3       // true
+5 >= 5       // true
+4 >= 5       // false
+```
+
+## Logical Operators
+
+### Logical AND `&&`
+
+```setsuna
+true && true    // true
+true && false   // false
+false && true   // false
+false && false  // false
+```
+
+**Short-circuit evaluation:**
+
+```setsuna
+false && expensive()  // expensive() is NOT called
+```
+
+### Logical OR `||`
+
+```setsuna
+true || true    // true
+true || false   // true
+false || true   // true
+false || false  // false
+```
+
+**Short-circuit evaluation:**
+
+```setsuna
+true || expensive()  // expensive() is NOT called
+```
+
+### Logical NOT `!`
+
+```setsuna
+!true   // false
+!false  // true
+!!true  // true
+```
+
+## Access Operators
+
+### Field Access `.`
+
+Access fields in records:
+
+```setsuna
+let person = { name: "Alice", age: 30 }
+person.name   // "Alice"
+person.age    // 30
+```
+
+Access nested fields:
+
+```setsuna
+let data = {
+    user: {
+        profile: {
+            name: "Bob"
+        }
+    }
+}
+data.user.profile.name  // "Bob"
+```
+
+### Tuple Index `.n`
+
+Access tuple elements by index:
+
+```setsuna
+let point = (10, 20, 30)
+point.0   // 10
+point.1   // 20
+point.2   // 30
+```
+
+### Module Access `.`
+
+Access module members:
+
+```setsuna
+module Math {
+    fn square(x) => x * x
+}
+
+Math.square(5)  // 25
+```
+
+## Special Operators
+
+### Arrow `=>`
+
+Used in:
+
+1. **Function definitions:**
+```setsuna
+fn double(x) => x * 2
+```
+
+2. **Lambda expressions:**
+```setsuna
+let add = (a, b) => a + b
+```
+
+3. **Match arms:**
+```setsuna
+match x {
+    0 => "zero",
+    _ => "other"
+}
+```
+
+### Spread `...`
+
+Used in pattern matching to capture remaining elements:
+
+```setsuna
+match lst {
+    [] => "empty",
+    [h, ...t] => "head: " + str(h)
+}
+```
+
+In let bindings:
+
+```setsuna
+let [first, ...rest] = [1, 2, 3, 4, 5]
+// first = 1, rest = [2, 3, 4, 5]
+```
+
+## Operator Examples
+
+### Combining Operators
+
+```setsuna
+// Arithmetic with comparison
+let result = (5 + 3) * 2 > 10  // true
+
+// Logical combinations
+let valid = x > 0 && x < 100
+
+// Chained comparisons (use &&)
+let in_range = x >= 0 && x <= 100
+```
+
+### Boolean Expressions
+
+```setsuna
+fn is_valid_age(age) {
+    age >= 0 && age <= 150
+}
+
+fn can_vote(person) {
+    person.age >= 18 && person.citizen == true
+}
+
+fn needs_review(score) {
+    score < 50 || score > 95
+}
+```
+
+### Conditional Assignment
+
+```setsuna
+// Using logical OR for defaults
+fn get_name(person) {
+    if len(person.name) > 0 {
+        person.name
+    } else {
+        "Anonymous"
+    }
+}
+```
+
+### Arithmetic Patterns
+
+```setsuna
+// Check if even
+fn is_even(n) => n % 2 == 0
+
+// Check if divisible
+fn divisible_by(n, d) => n % d == 0
+
+// Clamp value
+fn clamp(x, lo, hi) {
+    if x < lo { lo }
+    else if x > hi { hi }
+    else { x }
+}
+```
+
+## Type Coercion
+
+### Numeric Operations
+
+```setsuna
+// Int + Int = Int
+5 + 3       // 8 (Int)
+
+// Int + Float = Float
+5 + 3.0     // 8.0 (Float)
+
+// Float + Float = Float
+5.0 + 3.0   // 8.0 (Float)
+```
+
+### String Concatenation
+
+```setsuna
+"Hello" + " " + "World"  // "Hello World"
+
+// Numbers must be converted
+"Value: " + str(42)      // "Value: 42"
+```
+
+<Warning>
+You cannot directly concatenate strings with numbers. Use `str()` to convert.
+</Warning>
+
+## Common Patterns
+
+### Guard Conditions
+
+```setsuna
+fn classify(n) {
+    match n {
+        x if x < 0 => "negative",
+        x if x == 0 => "zero",
+        x if x > 0 && x < 10 => "small positive",
+        _ => "large positive"
+    }
+}
+```
+
+### Safe Division
+
+```setsuna
+fn safe_divide(a, b) {
+    if b == 0 {
+        None
+    } else {
+        Some(a / b)
+    }
+}
+```
+
+### Bounds Checking
+
+```setsuna
+fn get_element(lst, idx) {
+    if idx < 0 || idx >= len(lst) {
+        None
+    } else {
+        Some(nth(lst, idx))
+    }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Control Flow" icon="code-branch" href="/basics/control-flow">
+    Use operators in conditions
+  </Card>
+  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
+    Guards with operators
+  </Card>
+</CardGroup>

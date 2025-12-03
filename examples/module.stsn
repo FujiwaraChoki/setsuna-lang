@@ -1,0 +1,64 @@
+// Module example in Setsuna
+
+module Math {
+    fn square(x) => x * x
+    fn cube(x) => x * x * x
+    fn abs(x) => if x < 0 { -x } else { x }
+
+    fn factorial(n) {
+        match n {
+            0 => 1,
+            _ => n * factorial(n - 1)
+        }
+    }
+}
+
+module List {
+    fn map(f, lst) {
+        match lst {
+            [] => [],
+            [h, ...t] => cons(f(h), map(f, t))
+        }
+    }
+
+    fn filter(pred, lst) {
+        match lst {
+            [] => [],
+            [h, ...t] => if pred(h) {
+                cons(h, filter(pred, t))
+            } else {
+                filter(pred, t)
+            }
+        }
+    }
+
+    fn length(lst) {
+        match lst {
+            [] => 0,
+            [_, ...t] => 1 + length(t)
+        }
+    }
+}
+
+// Use module functions
+print("5 squared:")
+print(Math.square(5))
+
+print("3 cubed:")
+print(Math.cube(3))
+
+print("Factorial of 6:")
+print(Math.factorial(6))
+
+let nums = [1, 2, 3, 4, 5]
+let squares = List.map(Math.square, nums)
+
+print("Squares of 1-5:")
+print(squares)
+
+let big = List.filter((x) => x > 10, squares)
+print("Squares > 10:")
+print(big)
+
+print("Length of result:")
+print(List.length(big))

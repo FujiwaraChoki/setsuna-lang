@@ -1,0 +1,65 @@
+// Algebraic Data Types in Setsuna
+
+// Option type for nullable values
+type Option {
+    Some(x),
+    None
+}
+
+// Binary tree
+type Tree {
+    Leaf(x),
+    Node(l, r)
+}
+
+// Safe division that returns Option
+fn safe_div(a, b) {
+    if b == 0 {
+        None
+    } else {
+        Some(a / b)
+    }
+}
+
+// Get value from Option with default
+fn unwrap_or(opt, default) {
+    match opt {
+        Some(x) => x,
+        None => default
+    }
+}
+
+// Test Option
+let result1 = safe_div(10, 2)
+let result2 = safe_div(10, 0)
+
+print("10 / 2 =")
+print(unwrap_or(result1, 0))
+
+print("10 / 0 =")
+print(unwrap_or(result2, 0))
+
+// Tree operations
+fn tree_sum(tree) {
+    match tree {
+        Leaf(x) => x,
+        Node(left, right) => tree_sum(left) + tree_sum(right)
+    }
+}
+
+fn tree_map(f, tree) {
+    match tree {
+        Leaf(x) => Leaf(f(x)),
+        Node(left, right) => Node(tree_map(f, left), tree_map(f, right))
+    }
+}
+
+// Build a tree: ((1, 2), (3, 4))
+let my_tree = Node(Node(Leaf(1), Leaf(2)), Node(Leaf(3), Leaf(4)))
+
+print("Tree sum:")
+print(tree_sum(my_tree))
+
+let doubled_tree = tree_map((x) => x * 2, my_tree)
+print("Doubled tree sum:")
+print(tree_sum(doubled_tree))

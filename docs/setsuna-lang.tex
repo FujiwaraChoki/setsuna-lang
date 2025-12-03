@@ -1,0 +1,1091 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+% Colors
+\definecolor{keyword}{RGB}{0, 112, 192}
+\definecolor{string}{RGB}{163, 21, 21}
+\definecolor{comment}{RGB}{0, 128, 0}
+\definecolor{identifier}{RGB}{0, 0, 0}
+\definecolor{number}{RGB}{128, 64, 0}
+\definecolor{background}{RGB}{250, 250, 250}
+
+% Listing style for Setsuna
+\lstdefinelanguage{Setsuna}{
+    keywords={let, fn, if, else, match, type, module, import, true, false},
+    keywordstyle=\color{keyword}\bfseries,
+    sensitive=true,
+    comment=[l]{//},
+    commentstyle=\color{comment}\itshape,
+    stringstyle=\color{string},
+    string=[b]",
+    morestring=[b]',
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt,
+    backgroundcolor=\color{background},
+    frame=single,
+    rulecolor=\color{gray!30},
+    xleftmargin=2em,
+    framexleftmargin=1.5em,
+}
+
+\lstset{language=Setsuna}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textit{Setsuna Programming Language}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Title formatting
+\titleformat{\section}{\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+% Document info
+\title{\textbf{Setsuna Programming Language}\\[0.5em]\large A Modern Functional Programming Language}
+\author{Language Reference Manual}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+Setsuna is a modern functional programming language that combines ML-family language features with C-style syntax. It features Hindley-Milner type inference, powerful pattern matching, algebraic data types, first-class functions, and an immutability-first design philosophy. This document provides a comprehensive overview of the language's syntax, semantics, and standard library.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{Introduction}
+%==============================================================================
+
+Setsuna is a functional programming language designed to make functional programming natural and intuitive while maintaining a familiar syntax. The language draws inspiration from ML-family languages (such as OCaml and Haskell) while adopting a C-style syntax that is accessible to programmers from imperative backgrounds.
+
+\subsection{Design Philosophy}
+
+The core design principles of Setsuna are:
+
+\begin{enumerate}[label=\textbf{\arabic*.}]
+    \item \textbf{Functional First}: Make functional programming patterns natural and idiomatic
+    \item \textbf{Pattern Matching}: Provide powerful pattern matching with destructuring capabilities
+    \item \textbf{Type Safety}: Automatic type inference with compile-time safety guarantees
+    \item \textbf{Clean Syntax}: Expressive yet familiar syntax inspired by C-family languages
+    \item \textbf{Immutability}: Favor immutable data structures and pure functions
+    \item \textbf{Interactive Development}: Built-in REPL support for exploratory programming
+\end{enumerate}
+
+\subsection{File Extension}
+
+Setsuna source files use the \texttt{.stsn} file extension.
+
+%==============================================================================
+\section{Lexical Structure}
+%==============================================================================
+
+\subsection{Comments}
+
+Setsuna supports single-line comments using the \texttt{//} prefix:
+
+\begin{lstlisting}
+// This is a single-line comment
+let x = 42  // Inline comment
+\end{lstlisting}
+
+\subsection{Keywords}
+
+The following identifiers are reserved keywords in Setsuna:
+
+\begin{center}
+\begin{tabular}{llllll}
+\toprule
+\texttt{let} & \texttt{fn} & \texttt{if} & \texttt{else} & \texttt{match} & \texttt{type} \\
+\texttt{module} & \texttt{import} & \texttt{true} & \texttt{false} & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Operators}
+
+\subsubsection{Arithmetic Operators}
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Operator} & \textbf{Description} \\
+\midrule
+\texttt{+} & Addition \\
+\texttt{-} & Subtraction (binary) / Negation (unary) \\
+\texttt{*} & Multiplication \\
+\texttt{/} & Division \\
+\texttt{\%} & Modulo \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Comparison Operators}
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Operator} & \textbf{Description} \\
+\midrule
+\texttt{==} & Equal \\
+\texttt{!=} & Not equal \\
+\texttt{<} & Less than \\
+\texttt{>} & Greater than \\
+\texttt{<=} & Less than or equal \\
+\texttt{>=} & Greater than or equal \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Logical Operators}
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Operator} & \textbf{Description} \\
+\midrule
+\texttt{\&\&} & Logical AND (short-circuit) \\
+\texttt{||} & Logical OR (short-circuit) \\
+\texttt{!} & Logical NOT \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Operator Precedence}
+From highest to lowest precedence:
+\begin{enumerate}
+    \item \texttt{.} (field/module access)
+    \item \texttt{()} (function call)
+    \item \texttt{!}, \texttt{-} (unary operators)
+    \item \texttt{*}, \texttt{/}, \texttt{\%}
+    \item \texttt{+}, \texttt{-}
+    \item \texttt{<}, \texttt{>}, \texttt{<=}, \texttt{>=}
+    \item \texttt{==}, \texttt{!=}
+    \item \texttt{\&\&}
+    \item \texttt{||}
+    \item \texttt{=>} (right associative)
+\end{enumerate}
+
+%==============================================================================
+\section{Data Types}
+%==============================================================================
+
+Setsuna features automatic type inference using the Hindley-Milner algorithm, so explicit type annotations are rarely needed.
+
+\subsection{Primitive Types}
+
+\subsubsection{Integers}
+64-bit signed integers:
+\begin{lstlisting}
+let a = 42
+let b = -17
+let large = 9223372036854775807
+\end{lstlisting}
+
+\subsubsection{Floating-Point Numbers}
+64-bit floating-point (IEEE 754 double precision):
+\begin{lstlisting}
+let pi = 3.14159
+let e = 2.71828
+let negative = -0.5
+\end{lstlisting}
+
+\subsubsection{Booleans}
+Boolean values with literals \texttt{true} and \texttt{false}:
+\begin{lstlisting}
+let yes = true
+let no = false
+let result = 5 > 3  // true
+\end{lstlisting}
+
+\subsubsection{Strings}
+UTF-8 encoded strings with escape sequences:
+\begin{lstlisting}
+let greeting = "Hello, World!"
+let multiline = "Line 1\nLine 2"
+let escaped = "She said \"Hello\""
+\end{lstlisting}
+
+\subsubsection{Unit}
+The unit type represents the absence of a meaningful value:
+\begin{lstlisting}
+let nothing = ()
+\end{lstlisting}
+
+\subsection{Compound Types}
+
+\subsubsection{Lists}
+Homogeneous, ordered collections:
+\begin{lstlisting}
+let numbers = [1, 2, 3, 4, 5]
+let empty = []
+let words = ["apple", "banana", "cherry"]
+let nested = [[1, 2], [3, 4], [5, 6]]
+\end{lstlisting}
+
+\subsubsection{Tuples}
+Fixed-size collections that can hold heterogeneous types:
+\begin{lstlisting}
+let point = (10, 20)
+let person = ("Alice", 30, true)
+let single = (42,)  // Single-element tuple
+let access = point.0  // Accessing first element
+\end{lstlisting}
+
+\subsubsection{Records}
+Collections with named fields:
+\begin{lstlisting}
+let person = {
+    name: "Alice",
+    age: 30,
+    city: "Tokyo"
+}
+
+// Field access
+let name = person.name
+let age = person.age
+\end{lstlisting}
+
+%==============================================================================
+\section{Variables and Bindings}
+%==============================================================================
+
+Variables in Setsuna are immutable by default and are introduced using the \texttt{let} keyword.
+
+\subsection{Simple Bindings}
+\begin{lstlisting}
+let x = 42
+let name = "Alice"
+let is_valid = true
+\end{lstlisting}
+
+\subsection{Pattern Bindings}
+The \texttt{let} keyword supports destructuring patterns:
+\begin{lstlisting}
+// Tuple destructuring
+let (x, y) = (10, 20)
+
+// List destructuring
+let [first, ...rest] = [1, 2, 3, 4, 5]
+
+// Record destructuring
+let { name: n, age: a } = { name: "Bob", age: 25 }
+\end{lstlisting}
+
+%==============================================================================
+\section{Functions}
+%==============================================================================
+
+Functions are first-class values in Setsuna and can be passed as arguments, returned from other functions, and stored in data structures.
+
+\subsection{Function Definition}
+
+Functions are defined using the \texttt{fn} keyword. Two syntactic forms are available:
+
+\subsubsection{Block Syntax}
+\begin{lstlisting}
+fn add(a, b) {
+    a + b
+}
+
+fn greet(name) {
+    println("Hello, " + name)
+}
+\end{lstlisting}
+
+\subsubsection{Arrow Syntax}
+For single-expression functions:
+\begin{lstlisting}
+fn square(x) => x * x
+fn double(x) => x * 2
+fn greet(name) => "Hello, " + name
+\end{lstlisting}
+
+\subsection{Lambda Expressions}
+
+Anonymous functions (lambdas) use arrow syntax:
+\begin{lstlisting}
+let double = (x) => x * 2
+let add = (a, b) => a + b
+
+// Multi-expression lambda with block
+let quad = (x) => {
+    let squared = x * x
+    squared * squared
+}
+\end{lstlisting}
+
+\subsection{Higher-Order Functions}
+
+Functions can accept and return other functions:
+\begin{lstlisting}
+fn apply_twice(f, x) {
+    f(f(x))
+}
+
+let result = apply_twice((x) => x + 1, 10)  // 12
+
+fn make_adder(n) {
+    (x) => x + n
+}
+
+let add5 = make_adder(5)
+add5(10)  // 15
+\end{lstlisting}
+
+\subsection{Closures}
+
+Functions capture variables from their enclosing scope:
+\begin{lstlisting}
+fn counter(start) {
+    let count = start
+    () => {
+        count + 1
+    }
+}
+
+fn make_multiplier(factor) {
+    (x) => x * factor
+}
+
+let triple = make_multiplier(3)
+triple(7)  // 21
+\end{lstlisting}
+
+\subsection{Function Composition}
+\begin{lstlisting}
+fn compose(f, g) => (x) => f(g(x))
+fn pipe(f, g) => (x) => g(f(x))
+
+let double = (x) => x * 2
+let inc = (x) => x + 1
+
+let double_then_inc = pipe(double, inc)
+double_then_inc(5)  // 11
+\end{lstlisting}
+
+\subsection{Recursion}
+
+Setsuna supports recursive functions. The compiler optimizes tail-recursive calls:
+\begin{lstlisting}
+// Simple recursion
+fn factorial(n) {
+    match n {
+        0 => 1,
+        _ => n * factorial(n - 1)
+    }
+}
+
+// Tail-recursive version
+fn factorial_tail(n) {
+    fn helper(n, acc) {
+        match n {
+            0 => acc,
+            _ => helper(n - 1, n * acc)
+        }
+    }
+    helper(n, 1)
+}
+\end{lstlisting}
+
+%==============================================================================
+\section{Control Flow}
+%==============================================================================
+
+All control flow constructs in Setsuna are expressions that return values.
+
+\subsection{If Expressions}
+
+\begin{lstlisting}
+let result = if x > 5 { "big" } else { "small" }
+
+// Chained conditionals
+fn grade(score) {
+    if score >= 90 { "A" }
+    else if score >= 80 { "B" }
+    else if score >= 70 { "C" }
+    else if score >= 60 { "D" }
+    else { "F" }
+}
+\end{lstlisting}
+
+\subsection{Match Expressions}
+
+Pattern matching is the primary mechanism for control flow:
+\begin{lstlisting}
+match value {
+    0 => "zero",
+    1 => "one",
+    n if n > 10 => "large",
+    _ => "other"
+}
+\end{lstlisting}
+
+\subsection{Block Expressions}
+
+Blocks are expressions that return the value of their last expression:
+\begin{lstlisting}
+let result = {
+    let a = 10
+    let b = 20
+    a + b  // Block returns 30
+}
+\end{lstlisting}
+
+%==============================================================================
+\section{Pattern Matching}
+%==============================================================================
+
+Pattern matching is a powerful feature in Setsuna that allows for concise and expressive code.
+
+\subsection{Pattern Types}
+
+\subsubsection{Literal Patterns}
+\begin{lstlisting}
+match x {
+    0 => "zero",
+    1 => "one",
+    "hello" => "greeting",
+    true => "yes",
+    _ => "other"
+}
+\end{lstlisting}
+
+\subsubsection{Variable Patterns}
+\begin{lstlisting}
+match x {
+    n => n + 1  // Binds x to n
+}
+\end{lstlisting}
+
+\subsubsection{Wildcard Pattern}
+\begin{lstlisting}
+match x {
+    _ => "matches anything"
+}
+\end{lstlisting}
+
+\subsubsection{List Patterns}
+\begin{lstlisting}
+match list {
+    [] => "empty",
+    [x] => "single element",
+    [x, y] => "two elements",
+    [h, ...t] => "head and tail"
+}
+\end{lstlisting}
+
+\subsubsection{Tuple Patterns}
+\begin{lstlisting}
+match point {
+    (0, 0) => "origin",
+    (x, 0) => "on x-axis",
+    (0, y) => "on y-axis",
+    (x, y) => "general point"
+}
+\end{lstlisting}
+
+\subsubsection{Record Patterns}
+\begin{lstlisting}
+match person {
+    { name: "Alice", age: a } => "Alice is " + str(a),
+    { name: n, age: a } if a >= 18 => n + " is an adult",
+    { name: n, age: _ } => n + " is a minor"
+}
+\end{lstlisting}
+
+\subsubsection{Constructor Patterns}
+\begin{lstlisting}
+match option {
+    Some(x) => "has value: " + str(x),
+    None => "empty"
+}
+\end{lstlisting}
+
+\subsection{Pattern Guards}
+
+Guards add conditional constraints to patterns:
+\begin{lstlisting}
+fn classify(n) {
+    match n {
+        x if x < 0 => "negative",
+        x if x == 0 => "zero",
+        x if x < 10 => "small positive",
+        _ => "large positive"
+    }
+}
+\end{lstlisting}
+
+\subsection{Exhaustive Matching}
+
+The compiler ensures all patterns are covered:
+\begin{lstlisting}
+type Result {
+    Ok(value),
+    Err(message)
+}
+
+fn handle(result) {
+    match result {
+        Ok(v) => v,
+        Err(e) => error(e)
+        // All cases covered
+    }
+}
+\end{lstlisting}
+
+%==============================================================================
+\section{Algebraic Data Types}
+%==============================================================================
+
+Algebraic Data Types (ADTs) allow defining custom types with multiple constructors.
+
+\subsection{Type Definition}
+\begin{lstlisting}
+type Option {
+    Some(value),
+    None
+}
+
+type Result {
+    Ok(value),
+    Err(message)
+}
+
+type List {
+    Nil,
+    Cons(head, tail)
+}
+
+type Tree {
+    Leaf(value),
+    Node(left, right)
+}
+\end{lstlisting}
+
+\subsection{Using ADTs}
+\begin{lstlisting}
+// Creating values
+let maybe_value = Some(42)
+let nothing = None
+let ok_result = Ok("success")
+let err_result = Err("something went wrong")
+
+// Pattern matching on ADTs
+fn unwrap_or(opt, default) {
+    match opt {
+        Some(x) => x,
+        None => default
+    }
+}
+
+fn map_option(f, opt) {
+    match opt {
+        Some(x) => Some(f(x)),
+        None => None
+    }
+}
+\end{lstlisting}
+
+\subsection{Recursive ADTs}
+\begin{lstlisting}
+type Tree {
+    Leaf(value),
+    Node(left, right)
+}
+
+fn tree_sum(tree) {
+    match tree {
+        Leaf(x) => x,
+        Node(left, right) => tree_sum(left) + tree_sum(right)
+    }
+}
+
+fn tree_map(f, tree) {
+    match tree {
+        Leaf(x) => Leaf(f(x)),
+        Node(left, right) => Node(
+            tree_map(f, left),
+            tree_map(f, right)
+        )
+    }
+}
+
+// Example usage
+let my_tree = Node(
+    Node(Leaf(1), Leaf(2)),
+    Node(Leaf(3), Leaf(4))
+)
+
+tree_sum(my_tree)  // 10
+\end{lstlisting}
+
+%==============================================================================
+\section{Modules}
+%==============================================================================
+
+Modules provide namespace organization and encapsulation.
+
+\subsection{Module Definition}
+\begin{lstlisting}
+module Math {
+    fn square(x) => x * x
+    fn cube(x) => x * x * x
+
+    fn distance(x1, y1, x2, y2) {
+        let dx = x2 - x1
+        let dy = y2 - y1
+        sqrt(dx * dx + dy * dy)
+    }
+}
+\end{lstlisting}
+
+\subsection{Module Access}
+\begin{lstlisting}
+Math.square(5)      // 25
+Math.cube(3)        // 27
+Math.distance(0, 0, 3, 4)  // 5.0
+\end{lstlisting}
+
+\subsection{Module with Types}
+\begin{lstlisting}
+module User {
+    type Status {
+        Active,
+        Inactive,
+        Banned(reason)
+    }
+
+    fn create(name, email) {
+        {
+            name: name,
+            email: email,
+            status: Active
+        }
+    }
+
+    fn is_active(user) {
+        match user.status {
+            Active => true,
+            _ => false
+        }
+    }
+}
+
+let user = User.create("Alice", "alice@example.com")
+User.is_active(user)  // true
+\end{lstlisting}
+
+\subsection{Imports}
+\begin{lstlisting}
+import Math
+import User
+
+// After import, can use directly
+let x = square(5)
+let u = create("Bob", "bob@example.com")
+\end{lstlisting}
+
+%==============================================================================
+\section{Standard Library}
+%==============================================================================
+
+Setsuna includes a comprehensive standard library of functions.
+
+\subsection{List Functions}
+
+\subsubsection{Basic Operations}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{head(lst)} & Returns the first element \\
+\texttt{tail(lst)} & Returns all elements except the first \\
+\texttt{cons(x, lst)} & Prepends x to the list \\
+\texttt{len(lst)} & Returns the length of the list \\
+\texttt{empty(lst)} & Returns true if the list is empty \\
+\texttt{reverse(lst)} & Reverses the list \\
+\texttt{append(a, b)} & Concatenates two lists \\
+\texttt{nth(lst, n)} & Returns the n-th element (0-indexed) \\
+\texttt{range(start, end)} & Creates a list from start to end-1 \\
+\texttt{sort(lst)} & Sorts the list \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Higher-Order Functions}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{map(f, lst)} & Applies f to each element \\
+\texttt{filter(pred, lst)} & Keeps elements where pred is true \\
+\texttt{fold(f, init, lst)} & Left fold with accumulator \\
+\texttt{fold\_right(f, lst, init)} & Right fold with accumulator \\
+\texttt{reduce(f, lst)} & Reduces without initial value \\
+\texttt{flat\_map(f, lst)} & Maps and flattens results \\
+\texttt{any(pred, lst)} & True if any element satisfies pred \\
+\texttt{all(pred, lst)} & True if all elements satisfy pred \\
+\texttt{find(pred, lst)} & Finds first element satisfying pred \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Slicing and Zipping}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{take(n, lst)} & Takes first n elements \\
+\texttt{drop(n, lst)} & Drops first n elements \\
+\texttt{take\_while(pred, lst)} & Takes while predicate is true \\
+\texttt{drop\_while(pred, lst)} & Drops while predicate is true \\
+\texttt{zip(a, b)} & Zips two lists into pairs \\
+\texttt{zip\_with(f, a, b)} & Zips with a combining function \\
+\texttt{unzip(lst)} & Unzips list of pairs \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Aggregation}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{sum(lst)} & Sum of all elements \\
+\texttt{product(lst)} & Product of all elements \\
+\texttt{maximum(lst)} & Maximum element \\
+\texttt{minimum(lst)} & Minimum element \\
+\texttt{count(pred, lst)} & Counts elements satisfying pred \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Function Utilities}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{compose(f, g)} & Returns $f \circ g$ (i.e., $x \mapsto f(g(x))$) \\
+\texttt{pipe(f, g)} & Returns $g \circ f$ (i.e., $x \mapsto g(f(x))$) \\
+\texttt{identity(x)} & Returns x unchanged \\
+\texttt{constant(x)} & Returns function that always returns x \\
+\texttt{flip(f)} & Flips argument order of binary function \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{I/O Functions}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{print(x)} & Prints x without newline \\
+\texttt{println(x)} & Prints x with newline \\
+\texttt{input()} & Reads a line from stdin \\
+\texttt{input\_prompt(msg)} & Displays prompt, reads line \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Type Conversion}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{str(x)} & Converts to string \\
+\texttt{int(x)} & Converts to integer \\
+\texttt{float(x)} & Converts to float \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Type Checking}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{is\_int(x)} & True if x is an integer \\
+\texttt{is\_float(x)} & True if x is a float \\
+\texttt{is\_string(x)} & True if x is a string \\
+\texttt{is\_bool(x)} & True if x is a boolean \\
+\texttt{is\_list(x)} & True if x is a list \\
+\texttt{is\_tuple(x)} & True if x is a tuple \\
+\texttt{is\_record(x)} & True if x is a record \\
+\texttt{is\_fn(x)} & True if x is a function \\
+\texttt{type(x)} & Returns the type name as string \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Math Functions}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{abs(x)} & Absolute value \\
+\texttt{sqrt(x)} & Square root \\
+\texttt{pow(base, exp)} & Exponentiation \\
+\texttt{min(a, b)} & Minimum of two values \\
+\texttt{max(a, b)} & Maximum of two values \\
+\texttt{floor(x)} & Floor (round down) \\
+\texttt{ceil(x)} & Ceiling (round up) \\
+\texttt{round(x)} & Round to nearest integer \\
+\texttt{sin(x)}, \texttt{cos(x)}, \texttt{tan(x)} & Trigonometric functions \\
+\texttt{log(x)} & Natural logarithm \\
+\texttt{exp(x)} & Exponential ($e^x$) \\
+\texttt{random()} & Random float in $[0, 1)$ \\
+\texttt{pi} & Mathematical constant $\pi$ \\
+\texttt{e} & Mathematical constant $e$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{String Functions}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{substr(s, start, len)} & Extracts substring \\
+\texttt{split(s, delim)} & Splits string by delimiter \\
+\texttt{join(lst, delim)} & Joins list with delimiter \\
+\texttt{uppercase(s)} & Converts to uppercase \\
+\texttt{lowercase(s)} & Converts to lowercase \\
+\texttt{trim(s)} & Removes leading/trailing whitespace \\
+\texttt{contains(s, sub)} & True if s contains sub \\
+\texttt{starts\_with(s, pre)} & True if s starts with pre \\
+\texttt{ends\_with(s, suf)} & True if s ends with suf \\
+\texttt{replace(s, old, new)} & Replaces occurrences \\
+\texttt{chars(s)} & Converts to list of characters \\
+\texttt{index\_of(s, sub)} & Index of first occurrence \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Utility Functions}
+\begin{center}
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Function} & \textbf{Description} \\
+\midrule
+\texttt{error(msg)} & Raises an error with message \\
+\texttt{assert(cond)} & Asserts condition is true \\
+\texttt{compare(a, b)} & Returns -1, 0, or 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%==============================================================================
+\section{Example Programs}
+%==============================================================================
+
+\subsection{Fibonacci Sequence}
+\begin{lstlisting}
+// Naive recursive implementation
+fn fib(n) {
+    match n {
+        0 => 0,
+        1 => 1,
+        _ => fib(n - 1) + fib(n - 2)
+    }
+}
+
+// Efficient tail-recursive implementation
+fn fib_fast(n) {
+    fn helper(n, a, b) {
+        match n {
+            0 => a,
+            _ => helper(n - 1, b, a + b)
+        }
+    }
+    helper(n, 0, 1)
+}
+
+println(fib_fast(20))  // 6765
+\end{lstlisting}
+
+\subsection{QuickSort}
+\begin{lstlisting}
+fn quicksort(lst) {
+    match lst {
+        [] => [],
+        [pivot, ...rest] => {
+            let smaller = filter((x) => x < pivot, rest)
+            let larger = filter((x) => x >= pivot, rest)
+            append(
+                append(quicksort(smaller), [pivot]),
+                quicksort(larger)
+            )
+        }
+    }
+}
+
+let sorted = quicksort([3, 1, 4, 1, 5, 9, 2, 6])
+println(sorted)  // [1, 1, 2, 3, 4, 5, 6, 9]
+\end{lstlisting}
+
+\subsection{Binary Tree Operations}
+\begin{lstlisting}
+type Tree {
+    Leaf(value),
+    Node(left, right)
+}
+
+fn tree_height(tree) {
+    match tree {
+        Leaf(_) => 1,
+        Node(l, r) => 1 + max(tree_height(l), tree_height(r))
+    }
+}
+
+fn tree_flatten(tree) {
+    match tree {
+        Leaf(x) => [x],
+        Node(l, r) => append(tree_flatten(l), tree_flatten(r))
+    }
+}
+
+fn tree_map(f, tree) {
+    match tree {
+        Leaf(x) => Leaf(f(x)),
+        Node(l, r) => Node(tree_map(f, l), tree_map(f, r))
+    }
+}
+
+let tree = Node(
+    Node(Leaf(1), Leaf(2)),
+    Node(Leaf(3), Node(Leaf(4), Leaf(5)))
+)
+
+println(tree_height(tree))    // 4
+println(tree_flatten(tree))   // [1, 2, 3, 4, 5]
+\end{lstlisting}
+
+\subsection{Option Monad}
+\begin{lstlisting}
+type Option {
+    Some(value),
+    None
+}
+
+fn map_opt(f, opt) {
+    match opt {
+        Some(x) => Some(f(x)),
+        None => None
+    }
+}
+
+fn flat_map_opt(f, opt) {
+    match opt {
+        Some(x) => f(x),
+        None => None
+    }
+}
+
+fn filter_opt(pred, opt) {
+    match opt {
+        Some(x) if pred(x) => Some(x),
+        _ => None
+    }
+}
+
+// Safe division
+fn safe_div(a, b) {
+    if b == 0 { None }
+    else { Some(a / b) }
+}
+
+// Chaining operations
+let result = flat_map_opt(
+    (x) => safe_div(100, x),
+    safe_div(20, 4)
+)
+// safe_div(20, 4) = Some(5)
+// safe_div(100, 5) = Some(20)
+// result = Some(20)
+\end{lstlisting}
+
+\subsection{Functional Data Pipeline}
+\begin{lstlisting}
+// Process a list of numbers
+let numbers = range(1, 101)  // [1, 2, ..., 100]
+
+let result = numbers
+    |> filter((x) => x % 2 == 0)      // Keep even numbers
+    |> map((x) => x * x)               // Square them
+    |> filter((x) => x > 100)          // Keep > 100
+    |> take(5)                         // First 5
+
+// Equivalent using composition
+let process = compose(
+    (lst) => take(5, lst),
+    compose(
+        (lst) => filter((x) => x > 100, lst),
+        compose(
+            (lst) => map((x) => x * x, lst),
+            (lst) => filter((x) => x % 2 == 0, lst)
+        )
+    )
+)
+
+println(process(range(1, 101)))
+// [144, 196, 256, 324, 400]
+\end{lstlisting}
+
+%==============================================================================
+\section{Conclusion}
+%==============================================================================
+
+Setsuna is a thoughtfully designed functional programming language that brings together:
+
+\begin{itemize}
+    \item \textbf{Powerful pattern matching} with support for literals, variables, wildcards, destructuring, and guards
+    \item \textbf{Algebraic data types} for modeling complex domains safely
+    \item \textbf{First-class functions} with closures and higher-order programming
+    \item \textbf{Automatic type inference} eliminating boilerplate while maintaining safety
+    \item \textbf{Immutability by default} encouraging pure, predictable code
+    \item \textbf{Familiar C-style syntax} making it accessible to programmers from various backgrounds
+\end{itemize}
+
+The language is well-suited for applications requiring:
+\begin{itemize}
+    \item Data transformation and processing pipelines
+    \item Domain modeling with algebraic data types
+    \item Algorithm implementation with recursive patterns
+    \item Teaching functional programming concepts
+\end{itemize}
+
+For more information and examples, visit the official documentation and example files in the \texttt{examples/} and \texttt{docs/} directories of the Setsuna distribution.
+
+\end{document}

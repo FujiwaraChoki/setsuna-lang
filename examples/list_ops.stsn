@@ -1,0 +1,55 @@
+// List operations in Setsuna
+
+// Map function - apply f to each element
+fn map(f, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => cons(f(h), map(f, t))
+    }
+}
+
+// Filter function - keep elements where predicate is true
+fn filter(pred, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => if pred(h) {
+            cons(h, filter(pred, t))
+        } else {
+            filter(pred, t)
+        }
+    }
+}
+
+// Fold/reduce function
+fn fold(f, acc, lst) {
+    match lst {
+        [] => acc,
+        [h, ...t] => fold(f, f(acc, h), t)
+    }
+}
+
+// Sum using fold
+fn sum(lst) => fold((a, b) => a + b, 0, lst)
+
+// Product using fold
+fn product(lst) => fold((a, b) => a * b, 1, lst)
+
+// Test the functions
+let nums = [1, 2, 3, 4, 5]
+
+print("Original list:")
+print(nums)
+
+let doubled = map((x) => x * 2, nums)
+print("Doubled:")
+print(doubled)
+
+let evens = filter((x) => x % 2 == 0, nums)
+print("Evens only:")
+print(evens)
+
+print("Sum:")
+print(sum(nums))
+
+print("Product:")
+print(product(nums))

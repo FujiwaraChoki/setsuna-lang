@@ -1,0 +1,218 @@
+---
+title: Data Types
+description: Understanding Setsuna's type system
+---
+
+# Data Types
+
+Setsuna has a rich type system with several built-in types and support for user-defined algebraic data types.
+
+## Primitive Types
+
+### Integers
+
+64-bit signed integers:
+
+```setsuna
+let a = 42
+let b = -17
+let big = 9223372036854775807  // Max int64
+```
+
+### Floats
+
+64-bit floating-point numbers:
+
+```setsuna
+let pi = 3.14159
+let e = 2.71828
+let tiny = 0.0001
+```
+
+### Booleans
+
+Logical true/false values:
+
+```setsuna
+let yes = true
+let no = false
+let result = 5 > 3  // true
+```
+
+### Strings
+
+UTF-8 text strings:
+
+```setsuna
+let greeting = "Hello, World!"
+let name = "Setsuna"
+let multiline = "Line 1\nLine 2"  // Escape sequences supported
+```
+
+**String Operations:**
+
+```setsuna
+// Concatenation
+let full = "Hello, " + "World!"
+
+// Length
+let length = len("Hello")  // 5
+
+// Conversion
+let num_str = str(42)  // "42"
+```
+
+### Unit
+
+The empty/void type, represented as `()`:
+
+```setsuna
+let nothing = ()
+```
+
+## Compound Types
+
+### Lists
+
+Ordered collections of elements (all same type):
+
+```setsuna
+let numbers = [1, 2, 3, 4, 5]
+let words = ["apple", "banana", "cherry"]
+let empty = []
+```
+
+**List Operations:**
+
+```setsuna
+let nums = [1, 2, 3]
+
+// Access
+head(nums)      // 1
+tail(nums)      // [2, 3]
+
+// Build
+cons(0, nums)   // [0, 1, 2, 3]
+
+// Query
+len(nums)       // 3
+empty(nums)     // false
+empty([])       // true
+
+// Transform
+reverse(nums)   // [3, 2, 1]
+```
+
+### Tuples
+
+Fixed-size collections of potentially different types:
+
+```setsuna
+let point = (10, 20)
+let person = ("Alice", 30, true)
+let single = (42,)  // Single-element tuple
+```
+
+**Tuple Access:**
+
+```setsuna
+let point = (10, 20)
+point.0  // 10
+point.1  // 20
+```
+
+### Records
+
+Named field collections:
+
+```setsuna
+let person = {
+    name: "Alice",
+    age: 30,
+    city: "Tokyo"
+}
+
+// Field access
+person.name  // "Alice"
+person.age   // 30
+```
+
+## Type Comparison
+
+| Type | Example | Mutable | Ordered |
+|------|---------|---------|---------|
+| Int | `42` | No | Yes |
+| Float | `3.14` | No | Yes |
+| Bool | `true` | No | No |
+| String | `"hello"` | No | Yes |
+| List | `[1, 2, 3]` | No | Yes |
+| Tuple | `(1, "a")` | No | Yes (by position) |
+| Record | `{x: 1}` | No | No |
+
+## Type Conversions
+
+Setsuna provides functions to convert between types:
+
+```setsuna
+// To Int
+int(3.14)     // 3
+int("42")     // 42
+
+// To Float
+float(42)     // 42.0
+float("3.14") // 3.14
+
+// To String
+str(42)       // "42"
+str(3.14)     // "3.14"
+str(true)     // "true"
+```
+
+## Type Checking
+
+Runtime type checking functions:
+
+```setsuna
+is_int(42)        // true
+is_float(3.14)    // true
+is_string("hi")   // true
+is_bool(false)    // true
+is_list([1,2])    // true
+is_tuple((1,2))   // true
+is_record({x:1})  // true
+is_fn((x) => x)   // true
+```
+
+## Algebraic Data Types
+
+Define custom types with multiple variants:
+
+```setsuna
+type Option {
+    Some(value),
+    None
+}
+
+type Result {
+    Ok(value),
+    Err(message)
+}
+
+type Tree {
+    Leaf(value),
+    Node(left, right)
+}
+```
+
+See [Algebraic Types](/advanced/algebraic-types) for more details.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Functions" icon="function" href="/basics/functions">
+    Learn about defining and using functions
+  </Card>
+  <Card title="Algebraic Types" icon="sitemap" href="/advanced/algebraic-types">
+    Create custom data types
+  </Card>
+</CardGroup>

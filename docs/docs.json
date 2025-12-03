@@ -1,0 +1,83 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Setsuna",
+  "theme": "mint",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#8B5CF6",
+    "light": "#A78BFA",
+    "dark": "#7C3AED"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Language Basics",
+            "pages": [
+              "basics/variables",
+              "basics/types",
+              "basics/functions",
+              "basics/control-flow"
+            ]
+          },
+          {
+            "group": "Advanced Features",
+            "pages": [
+              "advanced/pattern-matching",
+              "advanced/algebraic-types",
+              "advanced/modules",
+              "advanced/records"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "Built-in Functions",
+            "pages": [
+              "reference/builtins",
+              "reference/list-ops",
+              "reference/math",
+              "reference/strings",
+              "reference/io"
+            ]
+          },
+          {
+            "group": "Syntax Reference",
+            "pages": [
+              "reference/grammar",
+              "reference/operators"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/FujiwaraChoki/setsuna-lang"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/FujiwaraChoki/setsuna-lang"
+    }
+  }
+}

@@ -1,0 +1,322 @@
+---
+title: Algebraic Data Types
+description: Defining and using custom types in Setsuna
+---
+
+# Algebraic Data Types
+
+Algebraic Data Types (ADTs) let you define custom types with multiple variants. They're perfect for modeling data that can take different forms.
+
+## Defining Types
+
+Use the `type` keyword to define an ADT:
+
+```setsuna
+type Color {
+    Red,
+    Green,
+    Blue
+}
+```
+
+### Constructors with Data
+
+Variants can carry data:
+
+```setsuna
+type Shape {
+    Circle(radius),
+    Rectangle(width, height),
+    Triangle(a, b, c)
+}
+
+let c = Circle(5)
+let r = Rectangle(10, 20)
+let t = Triangle(3, 4, 5)
+```
+
+### Nullary Constructors
+
+Variants without data are values themselves:
+
+```setsuna
+type Direction {
+    North,
+    South,
+    East,
+    West
+}
+
+let dir = North  // No parentheses needed
+```
+
+## Common ADT Patterns
+
+### Option Type
+
+Represents a value that might be absent:
+
+```setsuna
+type Option {
+    Some(value),
+    None
+}
+
+fn find(predicate, lst) {
+    match lst {
+        [] => None,
+        [h, ...t] => if predicate(h) {
+            Some(h)
+        } else {
+            find(predicate, t)
+        }
+    }
+}
+
+let result = find((x) => x > 5, [1, 3, 7, 2])
+match result {
+    Some(x) => print("Found: " + str(x)),
+    None => print("Not found")
+}
+```
+
+### Result Type
+
+Represents success or failure:
+
+```setsuna
+type Result {
+    Ok(value),
+    Err(error)
+}
+
+fn parse_int(s) {
+    // Simplified example
+    if s == "42" {
+        Ok(42)
+    } else {
+        Err("invalid number")
+    }
+}
+
+match parse_int("42") {
+    Ok(n) => print("Parsed: " + str(n)),
+    Err(e) => print("Error: " + e)
+}
+```
+
+### Either Type
+
+Represents one of two possible types:
+
+```setsuna
+type Either {
+    Left(value),
+    Right(value)
+}
+
+fn classify(n) {
+    if n % 2 == 0 {
+        Left(n)   // Even
+    } else {
+        Right(n)  // Odd
+    }
+}
+```
+
+### Linked List
+
+A classic recursive structure:
+
+```setsuna
+type List {
+    Cons(head, tail),
+    Nil
+}
+
+fn from_array(arr) {
+    match arr {
+        [] => Nil,
+        [h, ...t] => Cons(h, from_array(t))
+    }
+}
+
+fn to_array(lst) {
+    match lst {
+        Nil => [],
+        Cons(h, t) => cons(h, to_array(t))
+    }
+}
+
+let my_list = Cons(1, Cons(2, Cons(3, Nil)))
+print(to_array(my_list))  // [1, 2, 3]
+```
+
+### Binary Tree
+
+```setsuna
+type Tree {
+    Leaf(value),
+    Node(left, right)
+}
+
+fn tree_sum(tree) {
+    match tree {
+        Leaf(n) => n,
+        Node(l, r) => tree_sum(l) + tree_sum(r)
+    }
+}
+
+fn tree_map(f, tree) {
+    match tree {
+        Leaf(n) => Leaf(f(n)),
+        Node(l, r) => Node(tree_map(f, l), tree_map(f, r))
+    }
+}
+
+let tree = Node(
+    Node(Leaf(1), Leaf(2)),
+    Node(Leaf(3), Leaf(4))
+)
+
+print(tree_sum(tree))  // 10
+
+let doubled = tree_map((x) => x * 2, tree)
+print(tree_sum(doubled))  // 20
+```
+
+## Working with ADTs
+
+### Pattern Matching
+
+The primary way to work with ADTs:
+
+```setsuna
+type Expression {
+    Num(value),
+    Add(left, right),
+    Mul(left, right)
+}
+
+fn eval(expr) {
+    match expr {
+        Num(n) => n,
+        Add(l, r) => eval(l) + eval(r),
+        Mul(l, r) => eval(l) * eval(r)
+    }
+}
+
+// (2 + 3) * 4
+let expr = Mul(Add(Num(2), Num(3)), Num(4))
+print(eval(expr))  // 20
+```
+
+### Nested Matching
+
+```setsuna
+fn simplify(expr) {
+    match expr {
+        Add(Num(0), e) => e,
+        Add(e, Num(0)) => e,
+        Mul(Num(1), e) => e,
+        Mul(e, Num(1)) => e,
+        Mul(Num(0), _) => Num(0),
+        Mul(_, Num(0)) => Num(0),
+        _ => expr
+    }
+}
+```
+
+### Recursive Functions
+
+ADTs naturally lead to recursive functions:
+
+```setsuna
+type Nat {
+    Zero,
+    Succ(n)
+}
+
+fn to_int(nat) {
+    match nat {
+        Zero => 0,
+        Succ(n) => 1 + to_int(n)
+    }
+}
+
+fn from_int(n) {
+    if n == 0 {
+        Zero
+    } else {
+        Succ(from_int(n - 1))
+    }
+}
+
+fn add_nat(a, b) {
+    match a {
+        Zero => b,
+        Succ(n) => Succ(add_nat(n, b))
+    }
+}
+```
+
+## Best Practices
+
+<Tip>
+**Design Tips:**
+- Use ADTs to model domain concepts precisely
+- Prefer small, focused types over large ones
+- Use Option instead of null values
+- Use Result instead of throwing exceptions
+</Tip>
+
+### Modeling State
+
+```setsuna
+type ConnectionState {
+    Disconnected,
+    Connecting(attempt),
+    Connected(session),
+    Error(message)
+}
+
+fn handle_state(state) {
+    match state {
+        Disconnected => "Not connected",
+        Connecting(n) => "Attempt " + str(n) + "...",
+        Connected(s) => "Session: " + s,
+        Error(msg) => "Error: " + msg
+    }
+}
+```
+
+### Modeling Commands
+
+```setsuna
+type Command {
+    Move(x, y),
+    Rotate(angle),
+    Scale(factor),
+    Reset
+}
+
+fn execute(cmd, state) {
+    match cmd {
+        Move(x, y) => // move logic
+        Rotate(a) => // rotate logic
+        Scale(f) => // scale logic
+        Reset => // reset logic
+    }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
+    Deep dive into pattern matching
+  </Card>
+  <Card title="Modules" icon="boxes-stacked" href="/advanced/modules">
+    Organize ADTs in modules
+  </Card>
+</CardGroup>

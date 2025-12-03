@@ -1,0 +1,30 @@
+// Fibonacci sequence in Setsuna
+
+// Tail-recursive fibonacci (efficient)
+fn fib(n) {
+    fn helper(n, a, b) {
+        match n {
+            0 => a,
+            _ => helper(n - 1, b, a + b)
+        }
+    }
+    helper(n, 0, 1)
+}
+
+// Generate first n fibonacci numbers
+fn fib_list(n) {
+    fn helper(i, acc) {
+        if i >= n {
+            reverse(acc)
+        } else {
+            helper(i + 1, cons(fib(i), acc))
+        }
+    }
+    helper(0, [])
+}
+
+print("First 15 Fibonacci numbers:")
+print(fib_list(15))
+
+print("Fibonacci(20):")
+print(fib(20))

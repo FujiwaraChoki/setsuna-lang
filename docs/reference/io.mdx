@@ -1,0 +1,493 @@
+---
+title: I/O Functions
+description: Input and output operations in Setsuna
+---
+
+# I/O Functions
+
+Setsuna provides functions for console interaction and file system operations.
+
+## Output
+
+### print
+
+The `print` function outputs a value to the console with a newline.
+
+```setsuna
+print("Hello, World!")
+print(42)
+print(3.14)
+print(true)
+```
+
+**Output:**
+```
+Hello, World!
+42
+3.14
+true
+```
+
+### Printing Different Types
+
+`print` automatically converts values to their string representation:
+
+```setsuna
+// Numbers
+print(42)          // 42
+print(3.14159)     // 3.14159
+print(-100)        // -100
+
+// Strings
+print("hello")     // hello
+
+// Booleans
+print(true)        // true
+print(false)       // false
+
+// Lists
+print([1, 2, 3])   // [1, 2, 3]
+print([])          // []
+
+// Tuples
+print((1, 2))      // (1, 2)
+print((1, "a", true))  // (1, "a", true)
+
+// Records
+print({ name: "Alice", age: 30 })  // { name: "Alice", age: 30 }
+
+// Functions
+print((x) => x * 2)  // <function>
+```
+
+### Formatted Output
+
+Build formatted strings using concatenation:
+
+```setsuna
+let name = "Alice"
+let age = 30
+
+print("Name: " + name)
+print("Age: " + str(age))
+print(name + " is " + str(age) + " years old")
+```
+
+**Output:**
+```
+Name: Alice
+Age: 30
+Alice is 30 years old
+```
+
+### Custom Formatting Functions
+
+```setsuna
+fn format_person(person) {
+    "Person { name: \"" + person.name + "\", age: " + str(person.age) + " }"
+}
+
+let alice = { name: "Alice", age: 30 }
+print(format_person(alice))
+// Person { name: "Alice", age: 30 }
+```
+
+## Input
+
+### input
+
+The `input` function displays a prompt and reads a line from standard input.
+
+```setsuna
+let name = input("Enter your name: ")
+print("Hello, " + name + "!")
+```
+
+**Interaction:**
+```
+Enter your name: Alice
+Hello, Alice!
+```
+
+### Reading Numbers
+
+Input is always returned as a string. Use `int` or `float` to convert:
+
+```setsuna
+let age_str = input("Enter your age: ")
+let age = int(age_str)
+print("In 10 years you'll be " + str(age + 10))
+```
+
+### Interactive Programs
+
+```setsuna
+fn greet() {
+    let name = input("What is your name? ")
+    let age_str = input("How old are you? ")
+    let age = int(age_str)
+
+    print("Hello, " + name + "!")
+    print("You were born around " + str(2024 - age))
+}
+
+greet()
+```
+
+## Type Conversion for I/O
+
+### str
+
+Convert any value to a string:
+
+```setsuna
+str(42)        // "42"
+str(3.14)      // "3.14"
+str(true)      // "true"
+str(false)     // "false"
+str([1, 2])    // "[1, 2]"
+```
+
+### int
+
+Parse a string to an integer:
+
+```setsuna
+int("42")      // 42
+int("-17")     // -17
+int("3.7")     // 3 (truncates)
+int("hello")   // Error
+```
+
+### float
+
+Parse a string to a float:
+
+```setsuna
+float("3.14")  // 3.14
+float("42")    // 42.0
+float("-2.5")  // -2.5
+```
+
+## Common I/O Patterns
+
+### Simple REPL
+
+```setsuna
+fn repl() {
+    let input_str = input("> ")
+    if input_str == "quit" {
+        print("Goodbye!")
+    } else {
+        print("You said: " + input_str)
+        repl()
+    }
+}
+
+repl()
+```
+
+### Menu System
+
+```setsuna
+fn show_menu() {
+    print("1. Say hello")
+    print("2. Calculate")
+    print("3. Quit")
+
+    let choice = input("Choose: ")
+
+    match choice {
+        "1" => {
+            let name = input("Your name: ")
+            print("Hello, " + name + "!")
+            show_menu()
+        },
+        "2" => {
+            let a = int(input("First number: "))
+            let b = int(input("Second number: "))
+            print("Sum: " + str(a + b))
+            show_menu()
+        },
+        "3" => print("Goodbye!"),
+        _ => {
+            print("Invalid choice")
+            show_menu()
+        }
+    }
+}
+
+show_menu()
+```
+
+### Number Guessing Game
+
+```setsuna
+fn guess_game(secret) {
+    let guess_str = input("Guess a number (1-100): ")
+    let guess = int(guess_str)
+
+    if guess == secret {
+        print("Correct! You win!")
+    } else if guess < secret {
+        print("Too low!")
+        guess_game(secret)
+    } else {
+        print("Too high!")
+        guess_game(secret)
+    }
+}
+
+// Start game with secret number 42
+guess_game(42)
+```
+
+### Collecting Multiple Inputs
+
+```setsuna
+fn collect_names(count, names) {
+    if count == 0 {
+        names
+    } else {
+        let name = input("Enter name " + str(len(names) + 1) + ": ")
+        collect_names(count - 1, cons(name, names))
+    }
+}
+
+let names = reverse(collect_names(3, []))
+print("Names: ")
+print(names)
+```
+
+## Debug Printing
+
+### Printing with Labels
+
+```setsuna
+fn debug(label, value) {
+    print("[DEBUG] " + label + ": " + str(value))
+    value  // Return the value for chaining
+}
+
+let x = debug("initial", 5)
+let y = debug("doubled", x * 2)
+let z = debug("final", y + 1)
+```
+
+**Output:**
+```
+[DEBUG] initial: 5
+[DEBUG] doubled: 10
+[DEBUG] final: 11
+```
+
+### Tracing Function Calls
+
+```setsuna
+fn trace(name, args, result) {
+    print(name + "(" + str(args) + ") = " + str(result))
+    result
+}
+
+fn factorial(n) {
+    let result = match n {
+        0 => 1,
+        _ => n * factorial(n - 1)
+    }
+    trace("factorial", n, result)
+}
+
+factorial(5)
+```
+
+## File I/O
+
+Setsuna provides functions for reading and writing files.
+
+### file_read
+
+Read the entire contents of a file as a string.
+
+```setsuna
+let content = file_read("data.txt")
+print(content)
+
+// Read a config file
+let config = file_read("config.json")
+```
+
+**Signature:** `file_read(path) -> String`
+
+<Warning>
+Throws an error if the file doesn't exist or cannot be read.
+</Warning>
+
+### file_write
+
+Write a string to a file, overwriting any existing content.
+
+```setsuna
+file_write("output.txt", "Hello, World!")
+
+// Write multiple lines
+file_write("data.txt", "Line 1\nLine 2\nLine 3")
+
+// Save data
+let data = str([1, 2, 3, 4, 5])
+file_write("numbers.txt", data)
+```
+
+**Signature:** `file_write(path, content) -> ()`
+
+### file_append
+
+Append a string to the end of a file.
+
+```setsuna
+file_append("log.txt", "New log entry\n")
+
+// Build a file incrementally
+file_write("output.txt", "Header\n")
+file_append("output.txt", "Body line 1\n")
+file_append("output.txt", "Body line 2\n")
+```
+
+**Signature:** `file_append(path, content) -> ()`
+
+### file_exists
+
+Check if a file exists.
+
+```setsuna
+if file_exists("config.txt") {
+    let config = file_read("config.txt")
+    print("Config loaded")
+} else {
+    print("Using defaults")
+}
+```
+
+**Signature:** `file_exists(path) -> Bool`
+
+### file_delete
+
+Delete a file. Returns `true` if the file was deleted, `false` if it didn't exist.
+
+```setsuna
+file_delete("temp.txt")
+
+// Check before deleting
+if file_exists("old.txt") {
+    file_delete("old.txt")
+    print("File removed")
+}
+```
+
+**Signature:** `file_delete(path) -> Bool`
+
+### file_lines
+
+Read a file as a list of lines (without newline characters).
+
+```setsuna
+let lines = file_lines("data.txt")
+print("File has " + str(len(lines)) + " lines")
+
+// Process each line
+let numbers = map((line) => int(line), file_lines("numbers.txt"))
+print(sum(numbers))
+```
+
+**Signature:** `file_lines(path) -> List<String>`
+
+## Directory Operations
+
+### dir_list
+
+List the contents of a directory.
+
+```setsuna
+let files = dir_list(".")
+print(files)  // ["file1.txt", "file2.txt", "subdir", ...]
+
+// Filter for specific files
+let stsn_files = filter((f) => ends_with(f, ".stsn"), dir_list("."))
+```
+
+**Signature:** `dir_list(path) -> List<String>`
+
+### dir_exists
+
+Check if a directory exists.
+
+```setsuna
+if dir_exists("output") {
+    print("Output directory exists")
+} else {
+    print("Output directory not found")
+}
+```
+
+**Signature:** `dir_exists(path) -> Bool`
+
+## Common I/O Patterns
+
+### Configuration File
+
+```setsuna
+fn load_config(path) {
+    if file_exists(path) {
+        let lines = file_lines(path)
+        // Parse key=value pairs
+        map((line) => {
+            let parts = split(line, "=")
+            (nth(parts, 0), nth(parts, 1))
+        }, filter((line) => contains(line, "="), lines))
+    } else {
+        []  // Default empty config
+    }
+}
+
+let config = load_config("app.conf")
+```
+
+### Simple Logger
+
+```setsuna
+fn log(message) {
+    let timestamp = "2024-01-01"  // Would need a time function
+    file_append("app.log", timestamp + " - " + message + "\n")
+}
+
+log("Application started")
+log("Processing data...")
+log("Done")
+```
+
+### Processing Multiple Files
+
+```setsuna
+fn process_all_files(dir) {
+    let files = filter((f) => ends_with(f, ".txt"), dir_list(dir))
+    map((f) => {
+        let content = file_read(dir + "/" + f)
+        print("Processing: " + f)
+        // Process content...
+        len(content)
+    }, files)
+}
+
+let sizes = process_all_files("data")
+print("Total size: " + str(sum(sizes)))
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
+    All built-in functions
+  </Card>
+  <Card title="String Functions" icon="font" href="/reference/strings">
+    String manipulation
+  </Card>
+</CardGroup>

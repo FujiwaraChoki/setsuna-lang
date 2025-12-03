@@ -1,0 +1,322 @@
+---
+title: Pattern Matching
+description: Setsuna's powerful pattern matching system
+---
+
+# Pattern Matching
+
+Pattern matching is one of Setsuna's most powerful features. It lets you destructure data, check shapes, and bind variables in a single, elegant expression.
+
+## Basic Match Syntax
+
+```setsuna
+match value {
+    pattern1 => result1,
+    pattern2 => result2,
+    _ => default_result
+}
+```
+
+## Pattern Types
+
+### Literal Patterns
+
+Match exact values:
+
+```setsuna
+fn describe_number(n) {
+    match n {
+        0 => "zero",
+        1 => "one",
+        2 => "two",
+        42 => "the answer",
+        _ => "some number"
+    }
+}
+```
+
+### Variable Patterns
+
+Bind matched values to names:
+
+```setsuna
+match value {
+    x => print("Got: " + str(x))
+}
+```
+
+### Wildcard Pattern
+
+Match anything without binding:
+
+```setsuna
+match value {
+    0 => "zero",
+    _ => "not zero"  // _ matches anything
+}
+```
+
+### List Patterns
+
+Destructure lists:
+
+```setsuna
+fn describe_list(lst) {
+    match lst {
+        [] => "empty",
+        [x] => "single element: " + str(x),
+        [x, y] => "two elements",
+        [x, y, z] => "three elements",
+        _ => "many elements"
+    }
+}
+```
+
+#### Head and Tail
+
+Use `...` to capture the rest of a list:
+
+```setsuna
+fn process(lst) {
+    match lst {
+        [] => "done",
+        [head, ...tail] => {
+            print("Processing: " + str(head))
+            process(tail)
+        }
+    }
+}
+```
+
+<Tip>
+The `[head, ...tail]` pattern is the functional equivalent of `car` and `cdr` from Lisp.
+</Tip>
+
+### Tuple Patterns
+
+Destructure tuples:
+
+```setsuna
+fn process_point(point) {
+    match point {
+        (0, 0) => "origin",
+        (x, 0) => "on x-axis at " + str(x),
+        (0, y) => "on y-axis at " + str(y),
+        (x, y) => "at (" + str(x) + ", " + str(y) + ")"
+    }
+}
+
+print(process_point((0, 0)))    // "origin"
+print(process_point((5, 0)))    // "on x-axis at 5"
+print(process_point((3, 4)))    // "at (3, 4)"
+```
+
+### Record Patterns
+
+Match specific fields:
+
+```setsuna
+fn greet(person) {
+    match person {
+        { name: n, age: a } => "Hello, " + n + " (age " + str(a) + ")"
+    }
+}
+
+let alice = { name: "Alice", age: 30, city: "Tokyo" }
+print(greet(alice))  // "Hello, Alice (age 30)"
+```
+
+<Note>
+Record patterns only need to match specified fields—extra fields are ignored.
+</Note>
+
+### Constructor Patterns
+
+Match algebraic data type constructors:
+
+```setsuna
+type Option {
+    Some(value),
+    None
+}
+
+fn unwrap_or(opt, default) {
+    match opt {
+        Some(x) => x,
+        None => default
+    }
+}
+
+print(unwrap_or(Some(42), 0))  // 42
+print(unwrap_or(None, 0))      // 0
+```
+
+## Guards
+
+Add conditions to patterns with `if`:
+
+```setsuna
+fn classify(n) {
+    match n {
+        x if x < 0 => "negative",
+        x if x == 0 => "zero",
+        x if x < 10 => "small positive",
+        x if x < 100 => "medium positive",
+        _ => "large positive"
+    }
+}
+```
+
+Guards are evaluated after the pattern matches:
+
+```setsuna
+fn find_adult(people) {
+    match people {
+        [] => None,
+        [{ age: a, name: n }, ...rest] if a >= 18 => Some(n),
+        [_, ...rest] => find_adult(rest)
+    }
+}
+```
+
+## Nested Patterns
+
+Patterns can be nested arbitrarily:
+
+```setsuna
+type Tree {
+    Leaf(value),
+    Node(left, right)
+}
+
+fn sum_tree(tree) {
+    match tree {
+        Leaf(n) => n,
+        Node(Leaf(a), Leaf(b)) => a + b,
+        Node(left, right) => sum_tree(left) + sum_tree(right)
+    }
+}
+```
+
+## Pattern Matching in Let
+
+Destructure in let bindings:
+
+```setsuna
+// Tuple destructuring
+let (x, y) = (10, 20)
+print(x)  // 10
+print(y)  // 20
+
+// List destructuring
+let [first, second, ...rest] = [1, 2, 3, 4, 5]
+print(first)  // 1
+print(rest)   // [3, 4, 5]
+```
+
+## Common Patterns
+
+### Option Handling
+
+```setsuna
+type Option {
+    Some(value),
+    None
+}
+
+fn map_option(f, opt) {
+    match opt {
+        Some(x) => Some(f(x)),
+        None => None
+    }
+}
+
+fn flat_map_option(f, opt) {
+    match opt {
+        Some(x) => f(x),
+        None => None
+    }
+}
+```
+
+### Result Handling
+
+```setsuna
+type Result {
+    Ok(value),
+    Err(error)
+}
+
+fn safe_divide(a, b) {
+    if b == 0 {
+        Err("division by zero")
+    } else {
+        Ok(a / b)
+    }
+}
+
+fn handle_result(result) {
+    match result {
+        Ok(value) => print("Success: " + str(value)),
+        Err(msg) => print("Error: " + msg)
+    }
+}
+```
+
+### Recursive List Processing
+
+```setsuna
+fn map(f, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] => cons(f(h), map(f, t))
+    }
+}
+
+fn filter(pred, lst) {
+    match lst {
+        [] => [],
+        [h, ...t] if pred(h) => cons(h, filter(pred, t)),
+        [_, ...t] => filter(pred, t)
+    }
+}
+
+fn fold(f, acc, lst) {
+    match lst {
+        [] => acc,
+        [h, ...t] => fold(f, f(acc, h), t)
+    }
+}
+```
+
+## Exhaustiveness
+
+<Warning>
+Match expressions should cover all possible cases. If no pattern matches at runtime, an error is thrown.
+</Warning>
+
+```setsuna
+// Good - covers all cases
+match option {
+    Some(x) => x,
+    None => 0
+}
+
+// Always include a wildcard for safety
+match value {
+    0 => "zero",
+    1 => "one",
+    _ => "other"  // Catches everything else
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Algebraic Types" icon="sitemap" href="/advanced/algebraic-types">
+    Define custom types for pattern matching
+  </Card>
+  <Card title="Functions" icon="function" href="/basics/functions">
+    Use pattern matching in functions
+  </Card>
+</CardGroup>
