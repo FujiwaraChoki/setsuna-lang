@@ -1,9 +1,0 @@
-[build]
-  base = "docs"
-  command = "npx mintlify@latest build"
-  publish = "_site"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
