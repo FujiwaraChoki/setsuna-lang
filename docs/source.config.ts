@@ -22,6 +22,13 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    // MDX options
+    rehypePrettyCodeOptions: {
+      theme: 'github-dark-default',
+      transformers: [],
+      defaultLang: {
+        block: 'typescript',
+      },
+    },
   },
+  lastModifiedTime: 'git',
 });

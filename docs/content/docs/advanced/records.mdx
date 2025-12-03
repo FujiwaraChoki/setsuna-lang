@@ -11,7 +11,7 @@ Records are collections of named fields, similar to structs in other languages. 
 
 Use curly braces with `field: value` pairs:
 
-```setsuna
+```typescript
 let person = {
     name: "Alice",
     age: 30,
@@ -21,7 +21,7 @@ let person = {
 
 ### Inline Records
 
-```setsuna
+```typescript
 let point = { x: 10, y: 20 }
 let config = { debug: true, maxRetries: 3 }
 ```
@@ -30,7 +30,7 @@ let config = { debug: true, maxRetries: 3 }
 
 Use dot notation to access fields:
 
-```setsuna
+```typescript
 let person = { name: "Alice", age: 30 }
 
 print(person.name)  // "Alice"
@@ -41,7 +41,7 @@ print(person.age)   // 30
 
 ### As Parameters
 
-```setsuna
+```typescript
 fn greet(person) {
     print("Hello, " + person.name + "!")
 }
@@ -57,7 +57,7 @@ print(describe(alice))    // Alice is 30 years old
 
 ### As Return Values
 
-```setsuna
+```typescript
 fn make_point(x, y) {
     { x: x, y: y }
 }
@@ -74,7 +74,7 @@ print(p.x)  // 10
 
 Extract fields using pattern matching:
 
-```setsuna
+```typescript
 fn process(person) {
     match person {
         { name: n, age: a } => {
@@ -89,7 +89,7 @@ fn process(person) {
 
 You don't need to match all fields:
 
-```setsuna
+```typescript
 let person = { name: "Alice", age: 30, city: "Tokyo", country: "Japan" }
 
 // Only match the fields you need
@@ -105,7 +105,7 @@ match person {
 
 ### With Guards
 
-```setsuna
+```typescript
 fn classify_person(person) {
     match person {
         { age: a } if a < 18 => "minor",
@@ -119,7 +119,7 @@ fn classify_person(person) {
 
 Records can contain other records:
 
-```setsuna
+```typescript
 let employee = {
     name: "Alice",
     department: {
@@ -138,7 +138,7 @@ print(employee.contact.email)    // "alice@company.com"
 
 ### Nested Pattern Matching
 
-```setsuna
+```typescript
 fn get_dept_floor(employee) {
     match employee {
         { department: { floor: f } } => f
@@ -152,7 +152,7 @@ print(get_dept_floor(employee))  // 3
 
 ### Records in Lists
 
-```setsuna
+```typescript
 let people = [
     { name: "Alice", age: 30 },
     { name: "Bob", age: 25 },
@@ -175,7 +175,7 @@ print(get_names(people))  // ["Alice", "Bob", "Charlie"]
 
 ### Records in Tuples
 
-```setsuna
+```typescript
 let entry = ({ name: "Alice" }, 100)
 
 // Access tuple element, then record field
@@ -186,7 +186,7 @@ print(entry.0.name)  // "Alice"
 
 ### Builder Pattern
 
-```setsuna
+```typescript
 fn make_config() {
     { debug: false, port: 8080, host: "localhost" }
 }
@@ -209,7 +209,7 @@ print(config.port)   // 3000
 
 ### Data Transformation
 
-```setsuna
+```typescript
 fn transform_person(person) {
     {
         full_name: person.first_name + " " + person.last_name,
@@ -225,7 +225,7 @@ print(output.birth_year)  // 1994
 
 ### Validation
 
-```setsuna
+```typescript
 type ValidationResult {
     Valid(data),
     Invalid(errors)
@@ -269,7 +269,7 @@ fn validate_person(person) {
 | Self-documenting code | Quick, local grouping |
 | Domain objects | Function returns |
 
-```setsuna
+```typescript
 // Record - clear what each field means
 let person = { name: "Alice", age: 30 }
 
@@ -284,11 +284,7 @@ fn divide_with_remainder(a, b) {
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
-    Advanced pattern matching with records
-  </Card>
-  <Card title="Modules" icon="boxes-stacked" href="/advanced/modules">
-    Organize records in modules
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Pattern Matching" href="/advanced/pattern-matching" />
+  <Card title="Modules" href="/advanced/modules" />
+</Cards>

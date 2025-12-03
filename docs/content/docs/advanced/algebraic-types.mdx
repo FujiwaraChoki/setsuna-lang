@@ -11,7 +11,7 @@ Algebraic Data Types (ADTs) let you define custom types with multiple variants. 
 
 Use the `type` keyword to define an ADT:
 
-```setsuna
+```typescript
 type Color {
     Red,
     Green,
@@ -23,7 +23,7 @@ type Color {
 
 Variants can carry data:
 
-```setsuna
+```typescript
 type Shape {
     Circle(radius),
     Rectangle(width, height),
@@ -39,7 +39,7 @@ let t = Triangle(3, 4, 5)
 
 Variants without data are values themselves:
 
-```setsuna
+```typescript
 type Direction {
     North,
     South,
@@ -56,7 +56,7 @@ let dir = North  // No parentheses needed
 
 Represents a value that might be absent:
 
-```setsuna
+```typescript
 type Option {
     Some(value),
     None
@@ -84,7 +84,7 @@ match result {
 
 Represents success or failure:
 
-```setsuna
+```typescript
 type Result {
     Ok(value),
     Err(error)
@@ -109,7 +109,7 @@ match parse_int("42") {
 
 Represents one of two possible types:
 
-```setsuna
+```typescript
 type Either {
     Left(value),
     Right(value)
@@ -128,7 +128,7 @@ fn classify(n) {
 
 A classic recursive structure:
 
-```setsuna
+```typescript
 type List {
     Cons(head, tail),
     Nil
@@ -154,7 +154,7 @@ print(to_array(my_list))  // [1, 2, 3]
 
 ### Binary Tree
 
-```setsuna
+```typescript
 type Tree {
     Leaf(value),
     Node(left, right)
@@ -191,7 +191,7 @@ print(tree_sum(doubled))  // 20
 
 The primary way to work with ADTs:
 
-```setsuna
+```typescript
 type Expression {
     Num(value),
     Add(left, right),
@@ -213,7 +213,7 @@ print(eval(expr))  // 20
 
 ### Nested Matching
 
-```setsuna
+```typescript
 fn simplify(expr) {
     match expr {
         Add(Num(0), e) => e,
@@ -231,7 +231,7 @@ fn simplify(expr) {
 
 ADTs naturally lead to recursive functions:
 
-```setsuna
+```typescript
 type Nat {
     Zero,
     Succ(n)
@@ -272,7 +272,7 @@ fn add_nat(a, b) {
 
 ### Modeling State
 
-```setsuna
+```typescript
 type ConnectionState {
     Disconnected,
     Connecting(attempt),
@@ -292,7 +292,7 @@ fn handle_state(state) {
 
 ### Modeling Commands
 
-```setsuna
+```typescript
 type Command {
     Move(x, y),
     Rotate(angle),
@@ -312,11 +312,7 @@ fn execute(cmd, state) {
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
-    Deep dive into pattern matching
-  </Card>
-  <Card title="Modules" icon="boxes-stacked" href="/advanced/modules">
-    Organize ADTs in modules
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Pattern Matching" href="/advanced/pattern-matching" />
+  <Card title="Modules" href="/advanced/modules" />
+</Cards>

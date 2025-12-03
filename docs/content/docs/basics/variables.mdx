@@ -11,7 +11,7 @@ In Setsuna, variables are created using `let` bindings. All bindings are immutab
 
 The `let` keyword creates a new variable binding:
 
-```setsuna
+```typescript
 let name = "Setsuna"
 let age = 1
 let pi = 3.14159
@@ -22,7 +22,7 @@ let active = true
 
 Setsuna automatically infers the type of variables from their values:
 
-```setsuna
+```typescript
 let x = 42        // Int
 let y = 3.14      // Float
 let s = "hello"   // String
@@ -37,7 +37,7 @@ You don't need to specify types - Setsuna's type inference figures them out auto
 
 You can shadow a variable by binding a new value to the same name:
 
-```setsuna
+```typescript
 let x = 5
 print(x)  // 5
 
@@ -54,7 +54,7 @@ Shadowing creates a new binding rather than mutating the existing one.
 
 Variables are scoped to their containing block:
 
-```setsuna
+```typescript
 let outer = 1
 
 {
@@ -70,7 +70,7 @@ let outer = 1
 
 Variables defined in functions are local to that function:
 
-```setsuna
+```typescript
 fn calculate() {
     let result = 42
     result * 2
@@ -86,7 +86,7 @@ print(calculate())  // 84
 Variable and function names should use `snake_case`. Type names and constructors use `PascalCase`.
 </Info>
 
-```setsuna
+```typescript
 // Good
 let user_name = "Alice"
 let total_count = 100
@@ -103,7 +103,7 @@ type Option {
 
 ### Compound Bindings
 
-```setsuna
+```typescript
 let a = 10
 let b = 20
 let sum = a + b
@@ -115,7 +115,7 @@ print("Product: " + str(product)) // Product: 200
 
 ### Using Let with Functions
 
-```setsuna
+```typescript
 // Bind a function result
 let squared = (x) => x * x
 let result = squared(5)
@@ -130,6 +130,7 @@ print(sum)  // 30
 
 ## Next Steps
 
-<Card title="Data Types" icon="shapes" href="/basics/types">
-  Learn about all the data types available in Setsuna
-</Card>
+<Cards>
+  <Card title="Data Types" href="/basics/types" />
+</Cards>
+

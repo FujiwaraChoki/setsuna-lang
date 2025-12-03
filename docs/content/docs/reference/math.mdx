@@ -19,14 +19,14 @@ Setsuna provides built-in mathematical functions for common operations.
 
 ### Integer vs Float Division
 
-```setsuna
+```typescript
 10 / 3      // 3.333... (always float division)
 10 % 3      // 1 (integer remainder)
 ```
 
 ### Unary Minus
 
-```setsuna
+```typescript
 let x = 5
 let y = -x   // -5
 let z = -(-x) // 5
@@ -36,7 +36,7 @@ let z = -(-x) // 5
 
 Setsuna provides built-in mathematical constants:
 
-```setsuna
+```typescript
 pi    // 3.141592653589793
 e     // 2.718281828459045
 ```
@@ -49,7 +49,7 @@ Use these for trigonometric and exponential calculations.
 
 Returns the absolute value.
 
-```setsuna
+```typescript
 abs(-5)      // 5
 abs(5)       // 5
 abs(-3.14)   // 3.14
@@ -60,7 +60,7 @@ abs(0)       // 0
 
 Returns the square root.
 
-```setsuna
+```typescript
 sqrt(16)     // 4.0
 sqrt(2)      // 1.4142135623730951
 sqrt(0)      // 0.0
@@ -74,7 +74,7 @@ sqrt(0)      // 0.0
 
 Returns base raised to the power of exponent.
 
-```setsuna
+```typescript
 pow(2, 3)    // 8 (2³)
 pow(2, 10)   // 1024
 pow(2, 0)    // 1
@@ -87,7 +87,7 @@ pow(27, 1/3) // 3.0 (cube root)
 
 Returns the smaller of two values.
 
-```setsuna
+```typescript
 min(3, 5)        // 3
 min(-1, 1)       // -1
 min(3.14, 2.71)  // 2.71
@@ -98,7 +98,7 @@ min(0, 0)        // 0
 
 Returns the larger of two values.
 
-```setsuna
+```typescript
 max(3, 5)        // 5
 max(-1, 1)       // 1
 max(3.14, 2.71)  // 3.14
@@ -109,7 +109,7 @@ max(0, 0)        // 0
 
 Rounds down to the nearest integer.
 
-```setsuna
+```typescript
 floor(3.7)     // 3
 floor(3.2)     // 3
 floor(-3.2)    // -4
@@ -121,7 +121,7 @@ floor(5.0)     // 5
 
 Rounds up to the nearest integer.
 
-```setsuna
+```typescript
 ceil(3.2)      // 4
 ceil(3.7)      // 4
 ceil(-3.2)     // -3
@@ -133,7 +133,7 @@ ceil(5.0)      // 5
 
 Rounds to the nearest integer.
 
-```setsuna
+```typescript
 round(3.4)     // 3
 round(3.5)     // 4
 round(3.6)     // 4
@@ -148,7 +148,7 @@ Setsuna provides standard trigonometric functions. All angles are in radians.
 
 Returns the sine of an angle.
 
-```setsuna
+```typescript
 sin(0)         // 0.0
 sin(pi / 2)    // 1.0
 sin(pi)        // 0.0 (approximately)
@@ -158,7 +158,7 @@ sin(pi)        // 0.0 (approximately)
 
 Returns the cosine of an angle.
 
-```setsuna
+```typescript
 cos(0)         // 1.0
 cos(pi / 2)    // 0.0 (approximately)
 cos(pi)        // -1.0
@@ -168,7 +168,7 @@ cos(pi)        // -1.0
 
 Returns the tangent of an angle.
 
-```setsuna
+```typescript
 tan(0)         // 0.0
 tan(pi / 4)    // 1.0
 ```
@@ -177,7 +177,7 @@ tan(pi / 4)    // 1.0
 
 Returns the arcsine (inverse sine) in radians.
 
-```setsuna
+```typescript
 asin(0)        // 0.0
 asin(1)        // 1.5707... (pi/2)
 ```
@@ -186,7 +186,7 @@ asin(1)        // 1.5707... (pi/2)
 
 Returns the arccosine (inverse cosine) in radians.
 
-```setsuna
+```typescript
 acos(1)        // 0.0
 acos(0)        // 1.5707... (pi/2)
 ```
@@ -195,7 +195,7 @@ acos(0)        // 1.5707... (pi/2)
 
 Returns the arctangent (inverse tangent) in radians.
 
-```setsuna
+```typescript
 atan(0)        // 0.0
 atan(1)        // 0.7853... (pi/4)
 ```
@@ -204,7 +204,7 @@ atan(1)        // 0.7853... (pi/4)
 
 Returns the arctangent of y/x, using the signs of both arguments to determine the quadrant.
 
-```setsuna
+```typescript
 atan2(1, 1)    // 0.7853... (pi/4)
 atan2(1, 0)    // 1.5707... (pi/2)
 atan2(-1, -1)  // -2.356... (-3*pi/4)
@@ -216,7 +216,7 @@ atan2(-1, -1)  // -2.356... (-3*pi/4)
 
 Returns the natural logarithm (base e).
 
-```setsuna
+```typescript
 log(1)         // 0.0
 log(e)         // 1.0
 log(10)        // 2.302...
@@ -226,7 +226,7 @@ log(10)        // 2.302...
 
 Returns the base-10 logarithm.
 
-```setsuna
+```typescript
 log10(1)       // 0.0
 log10(10)      // 1.0
 log10(100)     // 2.0
@@ -236,7 +236,7 @@ log10(100)     // 2.0
 
 Returns e raised to the power of x.
 
-```setsuna
+```typescript
 exp(0)         // 1.0
 exp(1)         // 2.718... (e)
 exp(2)         // 7.389...
@@ -248,7 +248,7 @@ exp(2)         // 7.389...
 
 Returns a random floating-point number between 0 (inclusive) and 1 (exclusive).
 
-```setsuna
+```typescript
 random()       // 0.7234... (varies each call)
 random()       // 0.1567... (varies each call)
 
@@ -260,7 +260,7 @@ random() * 100
 
 Returns a random integer in the given range (inclusive on both ends).
 
-```setsuna
+```typescript
 random_int(1, 6)     // Random dice roll: 1, 2, 3, 4, 5, or 6
 random_int(0, 100)   // Random number from 0 to 100
 random_int(-10, 10)  // Random number from -10 to 10
@@ -270,7 +270,7 @@ random_int(-10, 10)  // Random number from -10 to 10
 
 ### Clamping Values
 
-```setsuna
+```typescript
 fn clamp(value, low, high) {
     min(max(value, low), high)
 }
@@ -282,7 +282,7 @@ clamp(15, 0, 10)   // 10
 
 ### Computing Distance
 
-```setsuna
+```typescript
 fn distance(x1, y1, x2, y2) {
     let dx = x2 - x1
     let dy = y2 - y1
@@ -294,7 +294,7 @@ distance(0, 0, 3, 4)  // 5.0
 
 ### Factorial
 
-```setsuna
+```typescript
 fn factorial(n) {
     match n {
         0 => 1,
@@ -308,7 +308,7 @@ factorial(10)  // 3628800
 
 ### Fibonacci
 
-```setsuna
+```typescript
 fn fib(n) {
     match n {
         0 => 0,
@@ -322,7 +322,7 @@ fib(10)  // 55
 
 ### GCD (Greatest Common Divisor)
 
-```setsuna
+```typescript
 fn gcd(a, b) {
     if b == 0 {
         abs(a)
@@ -337,7 +337,7 @@ gcd(100, 35)  // 5
 
 ### LCM (Least Common Multiple)
 
-```setsuna
+```typescript
 fn lcm(a, b) {
     abs(a * b) / gcd(a, b)
 }
@@ -348,7 +348,7 @@ lcm(3, 5)   // 15
 
 ### Is Prime
 
-```setsuna
+```typescript
 fn is_prime(n) {
     if n < 2 {
         false
@@ -372,7 +372,7 @@ is_prime(18)  // false
 
 ### Power (Recursive)
 
-```setsuna
+```typescript
 fn power(base, exp) {
     match exp {
         0 => 1,
@@ -390,7 +390,7 @@ fn power(base, exp) {
 
 Generate a range of numbers:
 
-```setsuna
+```typescript
 fn range(start, end) {
     if start >= end {
         []
@@ -405,7 +405,7 @@ range(0, 3)    // [0, 1, 2]
 
 ### With Step
 
-```setsuna
+```typescript
 fn range_step(start, end, step) {
     if start >= end {
         []
@@ -419,7 +419,7 @@ range_step(0, 10, 2)  // [0, 2, 4, 6, 8]
 
 ## Sum and Product
 
-```setsuna
+```typescript
 fn sum(lst) {
     fn helper(lst, acc) {
         match lst {
@@ -446,7 +446,7 @@ product([1, 2, 3, 4, 5])  // 120
 
 ## Average
 
-```setsuna
+```typescript
 fn average(lst) {
     if empty(lst) {
         error("Cannot average empty list")
@@ -460,11 +460,7 @@ average([1, 2, 3, 4, 5])  // 3
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
-    All built-in functions
-  </Card>
-  <Card title="Operators" icon="plus-minus" href="/reference/operators">
-    Complete operator reference
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Built-in Functions" href="/reference/builtins" />
+  <Card title="Operators" href="/reference/operators" />
+</Cards>

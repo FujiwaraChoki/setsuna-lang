@@ -11,7 +11,7 @@ Modules let you organize code into namespaced units, making it easier to structu
 
 Use the `module` keyword to create a module:
 
-```setsuna
+```typescript
 module Math {
     fn square(x) => x * x
     fn cube(x) => x * x * x
@@ -23,7 +23,7 @@ module Math {
 
 Access module members with dot notation:
 
-```setsuna
+```typescript
 print(Math.square(5))  // 25
 print(Math.cube(3))    // 27
 print(Math.abs(-10))   // 10
@@ -35,7 +35,7 @@ Modules can contain:
 
 ### Functions
 
-```setsuna
+```typescript
 module StringUtils {
     fn is_empty(s) => len(s) == 0
     fn repeat(s, n) {
@@ -55,7 +55,7 @@ print(StringUtils.repeat("ab", 3))  // "ababab"
 
 ### Type Definitions
 
-```setsuna
+```typescript
 module Collections {
     type Stack {
         Empty,
@@ -89,7 +89,7 @@ print(Collections.peek(stack))  // Some(2)
 
 ### Constants
 
-```setsuna
+```typescript
 module Constants {
     let PI = 3.14159265359
     let E = 2.71828182846
@@ -103,7 +103,7 @@ print(Constants.PI)  // 3.14159...
 
 Functions inside modules can call each other:
 
-```setsuna
+```typescript
 module Math {
     fn square(x) => x * x
 
@@ -127,7 +127,7 @@ print(Math.distance(0, 0, 3, 4))  // 5.0
 
 Group related functionality:
 
-```setsuna
+```typescript
 module List {
     fn map(f, lst) {
         match lst {
@@ -166,7 +166,7 @@ module List {
 
 Organize by domain concept:
 
-```setsuna
+```typescript
 module User {
     type Status {
         Active,
@@ -196,7 +196,7 @@ print(User.is_active(user))  // true
 
 ## Example: Complete Module
 
-```setsuna
+```typescript
 module Option {
     type T {
         Some(value),
@@ -266,7 +266,7 @@ print(Option.unwrap_or(doubled, 0))  // 84
 
 ### Module Naming
 
-```setsuna
+```typescript
 // Good - clear, descriptive names
 module StringUtils { ... }
 module MathOperations { ... }
@@ -289,11 +289,7 @@ The current Setsuna implementation has these module limitations:
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Records" icon="rectangle-list" href="/advanced/records">
-    Organize data with records
-  </Card>
-  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
-    Explore the standard library
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Records" href="/advanced/records" />
+  <Card title="Built-in Functions" href="/reference/builtins" />
+</Cards>

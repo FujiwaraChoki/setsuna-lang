@@ -28,7 +28,7 @@ From highest to lowest precedence:
 
 ### Addition `+`
 
-```setsuna
+```typescript
 5 + 3        // 8
 2.5 + 1.5    // 4.0
 "Hello" + " " + "World"  // "Hello World" (string concatenation)
@@ -36,21 +36,21 @@ From highest to lowest precedence:
 
 ### Subtraction `-`
 
-```setsuna
+```typescript
 10 - 3       // 7
 5.5 - 2.0    // 3.5
 ```
 
 ### Multiplication `*`
 
-```setsuna
+```typescript
 4 * 5        // 20
 2.5 * 3      // 7.5
 ```
 
 ### Division `/`
 
-```setsuna
+```typescript
 10 / 3       // 3.333...
 15 / 5       // 3.0
 7.5 / 2.5    // 3.0
@@ -62,7 +62,7 @@ Division always produces a float result, even with integer operands.
 
 ### Modulo `%`
 
-```setsuna
+```typescript
 10 % 3       // 1
 17 % 5       // 2
 -10 % 3      // -1
@@ -70,7 +70,7 @@ Division always produces a float result, even with integer operands.
 
 ### Unary Minus `-`
 
-```setsuna
+```typescript
 let x = 5
 let y = -x   // -5
 -(-10)       // 10
@@ -80,7 +80,7 @@ let y = -x   // -5
 
 ### Equality `==`
 
-```setsuna
+```typescript
 5 == 5       // true
 5 == 3       // false
 "a" == "a"   // true
@@ -90,7 +90,7 @@ true == true // true
 
 ### Inequality `!=`
 
-```setsuna
+```typescript
 5 != 3       // true
 5 != 5       // false
 "a" != "b"   // true
@@ -98,7 +98,7 @@ true == true // true
 
 ### Less Than `<`
 
-```setsuna
+```typescript
 3 < 5        // true
 5 < 3        // false
 5 < 5        // false
@@ -106,7 +106,7 @@ true == true // true
 
 ### Greater Than `>`
 
-```setsuna
+```typescript
 5 > 3        // true
 3 > 5        // false
 5 > 5        // false
@@ -114,7 +114,7 @@ true == true // true
 
 ### Less Than or Equal `<=`
 
-```setsuna
+```typescript
 3 <= 5       // true
 5 <= 5       // true
 6 <= 5       // false
@@ -122,7 +122,7 @@ true == true // true
 
 ### Greater Than or Equal `>=`
 
-```setsuna
+```typescript
 5 >= 3       // true
 5 >= 5       // true
 4 >= 5       // false
@@ -132,7 +132,7 @@ true == true // true
 
 ### Logical AND `&&`
 
-```setsuna
+```typescript
 true && true    // true
 true && false   // false
 false && true   // false
@@ -141,13 +141,13 @@ false && false  // false
 
 **Short-circuit evaluation:**
 
-```setsuna
+```typescript
 false && expensive()  // expensive() is NOT called
 ```
 
 ### Logical OR `||`
 
-```setsuna
+```typescript
 true || true    // true
 true || false   // true
 false || true   // true
@@ -156,13 +156,13 @@ false || false  // false
 
 **Short-circuit evaluation:**
 
-```setsuna
+```typescript
 true || expensive()  // expensive() is NOT called
 ```
 
 ### Logical NOT `!`
 
-```setsuna
+```typescript
 !true   // false
 !false  // true
 !!true  // true
@@ -174,7 +174,7 @@ true || expensive()  // expensive() is NOT called
 
 Access fields in records:
 
-```setsuna
+```typescript
 let person = { name: "Alice", age: 30 }
 person.name   // "Alice"
 person.age    // 30
@@ -182,7 +182,7 @@ person.age    // 30
 
 Access nested fields:
 
-```setsuna
+```typescript
 let data = {
     user: {
         profile: {
@@ -197,7 +197,7 @@ data.user.profile.name  // "Bob"
 
 Access tuple elements by index:
 
-```setsuna
+```typescript
 let point = (10, 20, 30)
 point.0   // 10
 point.1   // 20
@@ -208,7 +208,7 @@ point.2   // 30
 
 Access module members:
 
-```setsuna
+```typescript
 module Math {
     fn square(x) => x * x
 }
@@ -223,17 +223,17 @@ Math.square(5)  // 25
 Used in:
 
 1. **Function definitions:**
-```setsuna
+```typescript
 fn double(x) => x * 2
 ```
 
 2. **Lambda expressions:**
-```setsuna
+```typescript
 let add = (a, b) => a + b
 ```
 
 3. **Match arms:**
-```setsuna
+```typescript
 match x {
     0 => "zero",
     _ => "other"
@@ -244,7 +244,7 @@ match x {
 
 Used in pattern matching to capture remaining elements:
 
-```setsuna
+```typescript
 match lst {
     [] => "empty",
     [h, ...t] => "head: " + str(h)
@@ -253,7 +253,7 @@ match lst {
 
 In let bindings:
 
-```setsuna
+```typescript
 let [first, ...rest] = [1, 2, 3, 4, 5]
 // first = 1, rest = [2, 3, 4, 5]
 ```
@@ -262,7 +262,7 @@ let [first, ...rest] = [1, 2, 3, 4, 5]
 
 ### Combining Operators
 
-```setsuna
+```typescript
 // Arithmetic with comparison
 let result = (5 + 3) * 2 > 10  // true
 
@@ -275,7 +275,7 @@ let in_range = x >= 0 && x <= 100
 
 ### Boolean Expressions
 
-```setsuna
+```typescript
 fn is_valid_age(age) {
     age >= 0 && age <= 150
 }
@@ -291,7 +291,7 @@ fn needs_review(score) {
 
 ### Conditional Assignment
 
-```setsuna
+```typescript
 // Using logical OR for defaults
 fn get_name(person) {
     if len(person.name) > 0 {
@@ -304,7 +304,7 @@ fn get_name(person) {
 
 ### Arithmetic Patterns
 
-```setsuna
+```typescript
 // Check if even
 fn is_even(n) => n % 2 == 0
 
@@ -323,7 +323,7 @@ fn clamp(x, lo, hi) {
 
 ### Numeric Operations
 
-```setsuna
+```typescript
 // Int + Int = Int
 5 + 3       // 8 (Int)
 
@@ -336,7 +336,7 @@ fn clamp(x, lo, hi) {
 
 ### String Concatenation
 
-```setsuna
+```typescript
 "Hello" + " " + "World"  // "Hello World"
 
 // Numbers must be converted
@@ -351,7 +351,7 @@ You cannot directly concatenate strings with numbers. Use `str()` to convert.
 
 ### Guard Conditions
 
-```setsuna
+```typescript
 fn classify(n) {
     match n {
         x if x < 0 => "negative",
@@ -364,7 +364,7 @@ fn classify(n) {
 
 ### Safe Division
 
-```setsuna
+```typescript
 fn safe_divide(a, b) {
     if b == 0 {
         None
@@ -376,7 +376,7 @@ fn safe_divide(a, b) {
 
 ### Bounds Checking
 
-```setsuna
+```typescript
 fn get_element(lst, idx) {
     if idx < 0 || idx >= len(lst) {
         None
@@ -388,11 +388,7 @@ fn get_element(lst, idx) {
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Control Flow" icon="code-branch" href="/basics/control-flow">
-    Use operators in conditions
-  </Card>
-  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
-    Guards with operators
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Control Flow" href="/basics/control-flow" />
+  <Card title="Pattern Matching" href="/advanced/pattern-matching" />
+</Cards>

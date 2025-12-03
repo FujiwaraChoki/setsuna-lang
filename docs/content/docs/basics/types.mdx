@@ -13,7 +13,7 @@ Setsuna has a rich type system with several built-in types and support for user-
 
 64-bit signed integers:
 
-```setsuna
+```typescript
 let a = 42
 let b = -17
 let big = 9223372036854775807  // Max int64
@@ -23,7 +23,7 @@ let big = 9223372036854775807  // Max int64
 
 64-bit floating-point numbers:
 
-```setsuna
+```typescript
 let pi = 3.14159
 let e = 2.71828
 let tiny = 0.0001
@@ -33,7 +33,7 @@ let tiny = 0.0001
 
 Logical true/false values:
 
-```setsuna
+```typescript
 let yes = true
 let no = false
 let result = 5 > 3  // true
@@ -43,7 +43,7 @@ let result = 5 > 3  // true
 
 UTF-8 text strings:
 
-```setsuna
+```typescript
 let greeting = "Hello, World!"
 let name = "Setsuna"
 let multiline = "Line 1\nLine 2"  // Escape sequences supported
@@ -51,7 +51,7 @@ let multiline = "Line 1\nLine 2"  // Escape sequences supported
 
 **String Operations:**
 
-```setsuna
+```typescript
 // Concatenation
 let full = "Hello, " + "World!"
 
@@ -66,7 +66,7 @@ let num_str = str(42)  // "42"
 
 The empty/void type, represented as `()`:
 
-```setsuna
+```typescript
 let nothing = ()
 ```
 
@@ -76,7 +76,7 @@ let nothing = ()
 
 Ordered collections of elements (all same type):
 
-```setsuna
+```typescript
 let numbers = [1, 2, 3, 4, 5]
 let words = ["apple", "banana", "cherry"]
 let empty = []
@@ -84,7 +84,7 @@ let empty = []
 
 **List Operations:**
 
-```setsuna
+```typescript
 let nums = [1, 2, 3]
 
 // Access
@@ -107,7 +107,7 @@ reverse(nums)   // [3, 2, 1]
 
 Fixed-size collections of potentially different types:
 
-```setsuna
+```typescript
 let point = (10, 20)
 let person = ("Alice", 30, true)
 let single = (42,)  // Single-element tuple
@@ -115,7 +115,7 @@ let single = (42,)  // Single-element tuple
 
 **Tuple Access:**
 
-```setsuna
+```typescript
 let point = (10, 20)
 point.0  // 10
 point.1  // 20
@@ -125,7 +125,7 @@ point.1  // 20
 
 Named field collections:
 
-```setsuna
+```typescript
 let person = {
     name: "Alice",
     age: 30,
@@ -153,7 +153,7 @@ person.age   // 30
 
 Setsuna provides functions to convert between types:
 
-```setsuna
+```typescript
 // To Int
 int(3.14)     // 3
 int("42")     // 42
@@ -172,7 +172,7 @@ str(true)     // "true"
 
 Runtime type checking functions:
 
-```setsuna
+```typescript
 is_int(42)        // true
 is_float(3.14)    // true
 is_string("hi")   // true
@@ -187,7 +187,7 @@ is_fn((x) => x)   // true
 
 Define custom types with multiple variants:
 
-```setsuna
+```typescript
 type Option {
     Some(value),
     None

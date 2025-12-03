@@ -21,7 +21,7 @@ This page provides a formal specification of Setsuna's grammar in Extended Backu
 
 ## Program Structure
 
-```ebnf
+```text
 program         ::= { declaration }
 
 declaration     ::= let_binding
@@ -50,7 +50,7 @@ module_def      ::= "module" identifier "{" { declaration } "}"
 
 ## Expressions
 
-```ebnf
+```text
 expression      ::= if_expr
                   | match_expr
                   | lambda_expr
@@ -92,7 +92,7 @@ statement       ::= let_binding
 
 ## Patterns
 
-```ebnf
+```text
 pattern         ::= literal_pattern
                   | identifier_pattern
                   | wildcard_pattern
@@ -124,7 +124,7 @@ pattern_list    ::= pattern { "," pattern }
 
 ## Operators
 
-```ebnf
+```text
 binary_op       ::= "+" | "-" | "*" | "/" | "%"
                   | "==" | "!=" | "<" | ">" | "<=" | ">="
                   | "&&" | "||"
@@ -134,7 +134,7 @@ unary_op        ::= "-" | "!"
 
 ## Literals
 
-```ebnf
+```text
 literal         ::= integer
                   | float
                   | string
@@ -162,7 +162,7 @@ digit           ::= '0'..'9'
 
 ## Lists and Records
 
-```ebnf
+```text
 expr_list       ::= expression { "," expression }
 
 arg_list        ::= expression { "," expression }
@@ -190,7 +190,7 @@ async   await   mut     ref     pub
 
 ### Comments
 
-```ebnf
+```text
 line_comment    ::= "//" { <any character except newline> }
 ```
 
@@ -198,7 +198,7 @@ line_comment    ::= "//" { <any character except newline> }
 
 ### Let Binding
 
-```setsuna
+```typescript
 let x = 5
 let name = "Alice"
 let (a, b) = (1, 2)
@@ -214,7 +214,7 @@ let_binding → "let" pattern "=" expression
 
 ### Function Definition
 
-```setsuna
+```typescript
 fn add(x, y) => x + y
 
 fn factorial(n) {
@@ -234,7 +234,7 @@ function_def → "fn" identifier "(" param_list ")" function_body
 
 ### Type Definition
 
-```setsuna
+```typescript
 type Option {
     Some(value),
     None
@@ -255,7 +255,7 @@ type_def → "type" identifier "{" constructor_list "}"
 
 ### Match Expression
 
-```setsuna
+```typescript
 match value {
     0 => "zero",
     n if n > 0 => "positive",
@@ -271,7 +271,7 @@ match_expr → "match" expression "{" match_arms "}"
 
 ### Lambda Expression
 
-```setsuna
+```typescript
 let double = (x) => x * 2
 let add = (a, b) => a + b
 let constant = () => 42
@@ -309,7 +309,7 @@ lambda_expr → "(" param_list ")" "=>" expression
 - Newlines can appear within blocks and expressions
 - Indentation is not significant (not like Python)
 
-```setsuna
+```typescript
 // These are equivalent:
 let x = if true { 1 } else { 2 }
 
@@ -331,11 +331,7 @@ else
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
-    Standard library reference
-  </Card>
-  <Card title="Quick Start" icon="rocket" href="/quickstart">
-    Start writing Setsuna
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Built-in Functions" href="/reference/builtins" />
+  <Card title="Quick Start" href="/quickstart" />
+</Cards>

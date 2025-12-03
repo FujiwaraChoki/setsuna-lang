@@ -9,7 +9,7 @@ Pattern matching is one of Setsuna's most powerful features. It lets you destruc
 
 ## Basic Match Syntax
 
-```setsuna
+```typescript
 match value {
     pattern1 => result1,
     pattern2 => result2,
@@ -23,7 +23,7 @@ match value {
 
 Match exact values:
 
-```setsuna
+```typescript
 fn describe_number(n) {
     match n {
         0 => "zero",
@@ -39,7 +39,7 @@ fn describe_number(n) {
 
 Bind matched values to names:
 
-```setsuna
+```typescript
 match value {
     x => print("Got: " + str(x))
 }
@@ -49,7 +49,7 @@ match value {
 
 Match anything without binding:
 
-```setsuna
+```typescript
 match value {
     0 => "zero",
     _ => "not zero"  // _ matches anything
@@ -60,7 +60,7 @@ match value {
 
 Destructure lists:
 
-```setsuna
+```typescript
 fn describe_list(lst) {
     match lst {
         [] => "empty",
@@ -76,7 +76,7 @@ fn describe_list(lst) {
 
 Use `...` to capture the rest of a list:
 
-```setsuna
+```typescript
 fn process(lst) {
     match lst {
         [] => "done",
@@ -96,7 +96,7 @@ The `[head, ...tail]` pattern is the functional equivalent of `car` and `cdr` fr
 
 Destructure tuples:
 
-```setsuna
+```typescript
 fn process_point(point) {
     match point {
         (0, 0) => "origin",
@@ -115,7 +115,7 @@ print(process_point((3, 4)))    // "at (3, 4)"
 
 Match specific fields:
 
-```setsuna
+```typescript
 fn greet(person) {
     match person {
         { name: n, age: a } => "Hello, " + n + " (age " + str(a) + ")"
@@ -134,7 +134,7 @@ Record patterns only need to match specified fields—extra fields are ignored.
 
 Match algebraic data type constructors:
 
-```setsuna
+```typescript
 type Option {
     Some(value),
     None
@@ -155,7 +155,7 @@ print(unwrap_or(None, 0))      // 0
 
 Add conditions to patterns with `if`:
 
-```setsuna
+```typescript
 fn classify(n) {
     match n {
         x if x < 0 => "negative",
@@ -169,7 +169,7 @@ fn classify(n) {
 
 Guards are evaluated after the pattern matches:
 
-```setsuna
+```typescript
 fn find_adult(people) {
     match people {
         [] => None,
@@ -183,7 +183,7 @@ fn find_adult(people) {
 
 Patterns can be nested arbitrarily:
 
-```setsuna
+```typescript
 type Tree {
     Leaf(value),
     Node(left, right)
@@ -202,7 +202,7 @@ fn sum_tree(tree) {
 
 Destructure in let bindings:
 
-```setsuna
+```typescript
 // Tuple destructuring
 let (x, y) = (10, 20)
 print(x)  // 10
@@ -218,7 +218,7 @@ print(rest)   // [3, 4, 5]
 
 ### Option Handling
 
-```setsuna
+```typescript
 type Option {
     Some(value),
     None
@@ -241,7 +241,7 @@ fn flat_map_option(f, opt) {
 
 ### Result Handling
 
-```setsuna
+```typescript
 type Result {
     Ok(value),
     Err(error)
@@ -265,7 +265,7 @@ fn handle_result(result) {
 
 ### Recursive List Processing
 
-```setsuna
+```typescript
 fn map(f, lst) {
     match lst {
         [] => [],
@@ -295,7 +295,7 @@ fn fold(f, acc, lst) {
 Match expressions should cover all possible cases. If no pattern matches at runtime, an error is thrown.
 </Warning>
 
-```setsuna
+```typescript
 // Good - covers all cases
 match option {
     Some(x) => x,
@@ -312,11 +312,7 @@ match value {
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Algebraic Types" icon="sitemap" href="/advanced/algebraic-types">
-    Define custom types for pattern matching
-  </Card>
-  <Card title="Functions" icon="function" href="/basics/functions">
-    Use pattern matching in functions
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Algebraic Types" href="/advanced/algebraic-types" />
+  <Card title="Functions" href="/basics/functions" />
+</Cards>

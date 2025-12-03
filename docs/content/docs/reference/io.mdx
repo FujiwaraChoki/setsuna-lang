@@ -13,7 +13,7 @@ Setsuna provides functions for console interaction and file system operations.
 
 The `print` function outputs a value to the console with a newline.
 
-```setsuna
+```typescript
 print("Hello, World!")
 print(42)
 print(3.14)
@@ -32,7 +32,7 @@ true
 
 `print` automatically converts values to their string representation:
 
-```setsuna
+```typescript
 // Numbers
 print(42)          // 42
 print(3.14159)     // 3.14159
@@ -64,7 +64,7 @@ print((x) => x * 2)  // <function>
 
 Build formatted strings using concatenation:
 
-```setsuna
+```typescript
 let name = "Alice"
 let age = 30
 
@@ -82,7 +82,7 @@ Alice is 30 years old
 
 ### Custom Formatting Functions
 
-```setsuna
+```typescript
 fn format_person(person) {
     "Person { name: \"" + person.name + "\", age: " + str(person.age) + " }"
 }
@@ -98,7 +98,7 @@ print(format_person(alice))
 
 The `input` function displays a prompt and reads a line from standard input.
 
-```setsuna
+```typescript
 let name = input("Enter your name: ")
 print("Hello, " + name + "!")
 ```
@@ -113,7 +113,7 @@ Hello, Alice!
 
 Input is always returned as a string. Use `int` or `float` to convert:
 
-```setsuna
+```typescript
 let age_str = input("Enter your age: ")
 let age = int(age_str)
 print("In 10 years you'll be " + str(age + 10))
@@ -121,7 +121,7 @@ print("In 10 years you'll be " + str(age + 10))
 
 ### Interactive Programs
 
-```setsuna
+```typescript
 fn greet() {
     let name = input("What is your name? ")
     let age_str = input("How old are you? ")
@@ -140,7 +140,7 @@ greet()
 
 Convert any value to a string:
 
-```setsuna
+```typescript
 str(42)        // "42"
 str(3.14)      // "3.14"
 str(true)      // "true"
@@ -152,7 +152,7 @@ str([1, 2])    // "[1, 2]"
 
 Parse a string to an integer:
 
-```setsuna
+```typescript
 int("42")      // 42
 int("-17")     // -17
 int("3.7")     // 3 (truncates)
@@ -163,7 +163,7 @@ int("hello")   // Error
 
 Parse a string to a float:
 
-```setsuna
+```typescript
 float("3.14")  // 3.14
 float("42")    // 42.0
 float("-2.5")  // -2.5
@@ -173,7 +173,7 @@ float("-2.5")  // -2.5
 
 ### Simple REPL
 
-```setsuna
+```typescript
 fn repl() {
     let input_str = input("> ")
     if input_str == "quit" {
@@ -189,7 +189,7 @@ repl()
 
 ### Menu System
 
-```setsuna
+```typescript
 fn show_menu() {
     print("1. Say hello")
     print("2. Calculate")
@@ -222,7 +222,7 @@ show_menu()
 
 ### Number Guessing Game
 
-```setsuna
+```typescript
 fn guess_game(secret) {
     let guess_str = input("Guess a number (1-100): ")
     let guess = int(guess_str)
@@ -244,7 +244,7 @@ guess_game(42)
 
 ### Collecting Multiple Inputs
 
-```setsuna
+```typescript
 fn collect_names(count, names) {
     if count == 0 {
         names
@@ -263,7 +263,7 @@ print(names)
 
 ### Printing with Labels
 
-```setsuna
+```typescript
 fn debug(label, value) {
     print("[DEBUG] " + label + ": " + str(value))
     value  // Return the value for chaining
@@ -283,7 +283,7 @@ let z = debug("final", y + 1)
 
 ### Tracing Function Calls
 
-```setsuna
+```typescript
 fn trace(name, args, result) {
     print(name + "(" + str(args) + ") = " + str(result))
     result
@@ -308,7 +308,7 @@ Setsuna provides functions for reading and writing files.
 
 Read the entire contents of a file as a string.
 
-```setsuna
+```typescript
 let content = file_read("data.txt")
 print(content)
 
@@ -326,7 +326,7 @@ Throws an error if the file doesn't exist or cannot be read.
 
 Write a string to a file, overwriting any existing content.
 
-```setsuna
+```typescript
 file_write("output.txt", "Hello, World!")
 
 // Write multiple lines
@@ -343,7 +343,7 @@ file_write("numbers.txt", data)
 
 Append a string to the end of a file.
 
-```setsuna
+```typescript
 file_append("log.txt", "New log entry\n")
 
 // Build a file incrementally
@@ -358,7 +358,7 @@ file_append("output.txt", "Body line 2\n")
 
 Check if a file exists.
 
-```setsuna
+```typescript
 if file_exists("config.txt") {
     let config = file_read("config.txt")
     print("Config loaded")
@@ -373,7 +373,7 @@ if file_exists("config.txt") {
 
 Delete a file. Returns `true` if the file was deleted, `false` if it didn't exist.
 
-```setsuna
+```typescript
 file_delete("temp.txt")
 
 // Check before deleting
@@ -389,7 +389,7 @@ if file_exists("old.txt") {
 
 Read a file as a list of lines (without newline characters).
 
-```setsuna
+```typescript
 let lines = file_lines("data.txt")
 print("File has " + str(len(lines)) + " lines")
 
@@ -406,7 +406,7 @@ print(sum(numbers))
 
 List the contents of a directory.
 
-```setsuna
+```typescript
 let files = dir_list(".")
 print(files)  // ["file1.txt", "file2.txt", "subdir", ...]
 
@@ -420,7 +420,7 @@ let stsn_files = filter((f) => ends_with(f, ".stsn"), dir_list("."))
 
 Check if a directory exists.
 
-```setsuna
+```typescript
 if dir_exists("output") {
     print("Output directory exists")
 } else {
@@ -434,7 +434,7 @@ if dir_exists("output") {
 
 ### Configuration File
 
-```setsuna
+```typescript
 fn load_config(path) {
     if file_exists(path) {
         let lines = file_lines(path)
@@ -453,7 +453,7 @@ let config = load_config("app.conf")
 
 ### Simple Logger
 
-```setsuna
+```typescript
 fn log(message) {
     let timestamp = "2024-01-01"  // Would need a time function
     file_append("app.log", timestamp + " - " + message + "\n")
@@ -466,7 +466,7 @@ log("Done")
 
 ### Processing Multiple Files
 
-```setsuna
+```typescript
 fn process_all_files(dir) {
     let files = filter((f) => ends_with(f, ".txt"), dir_list(dir))
     map((f) => {
@@ -483,11 +483,7 @@ print("Total size: " + str(sum(sizes)))
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
-    All built-in functions
-  </Card>
-  <Card title="String Functions" icon="font" href="/reference/strings">
-    String manipulation
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Built-in Functions" href="/reference/builtins" />
+  <Card title="String Functions" href="/reference/strings" />
+</Cards>

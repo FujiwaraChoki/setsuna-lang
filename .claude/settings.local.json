@@ -15,7 +15,9 @@
       "Bash(mv:*)",
       "Bash(bun create fumadocs-app)",
       "Bash(bun create:*)",
-      "Bash(../build/setsuna print.stsn:*)"
+      "Bash(../build/setsuna print.stsn:*)",
+      "Bash(find:*)",
+      "Bash(bun run dev)"
     ],
     "deny": [],
     "ask": []

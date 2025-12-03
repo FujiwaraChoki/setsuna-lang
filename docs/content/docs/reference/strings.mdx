@@ -35,7 +35,7 @@ Setsuna provides a comprehensive set of built-in functions for string manipulati
 
 Get the number of characters in a string.
 
-```setsuna
+```typescript
 len("hello")       // 5
 len("")            // 0
 len("hello world") // 11
@@ -49,7 +49,7 @@ len("hello world") // 11
 
 Extract a substring from start index to end index (exclusive).
 
-```setsuna
+```typescript
 substr("hello", 0, 2)    // "he"
 substr("hello", 1, 4)    // "ell"
 substr("hello", 2, 5)    // "llo"
@@ -61,7 +61,7 @@ substr("hello", 2, 5)    // "llo"
 
 Get the character at a specific index.
 
-```setsuna
+```typescript
 char_at("hello", 0)      // "h"
 char_at("hello", 4)      // "o"
 char_at("hello", 10)     // Error: index out of bounds
@@ -73,7 +73,7 @@ char_at("hello", 10)     // Error: index out of bounds
 
 Convert a string to a list of single-character strings.
 
-```setsuna
+```typescript
 chars("abc")             // ["a", "b", "c"]
 chars("hello")           // ["h", "e", "l", "l", "o"]
 chars("")                // []
@@ -87,7 +87,7 @@ chars("")                // []
 
 Check if a string contains a substring.
 
-```setsuna
+```typescript
 contains("hello world", "world")  // true
 contains("hello world", "foo")    // false
 contains("hello", "")             // true
@@ -99,7 +99,7 @@ contains("hello", "")             // true
 
 Check if a string starts with a prefix.
 
-```setsuna
+```typescript
 starts_with("hello", "he")        // true
 starts_with("hello", "lo")        // false
 starts_with("hello", "")          // true
@@ -111,7 +111,7 @@ starts_with("hello", "")          // true
 
 Check if a string ends with a suffix.
 
-```setsuna
+```typescript
 ends_with("hello", "lo")          // true
 ends_with("hello", "he")          // false
 ends_with("hello", "")            // true
@@ -123,7 +123,7 @@ ends_with("hello", "")            // true
 
 Find the index of the first occurrence of a substring. Returns -1 if not found.
 
-```setsuna
+```typescript
 index_of("hello", "l")            // 2
 index_of("hello", "lo")           // 3
 index_of("hello", "x")            // -1
@@ -137,7 +137,7 @@ index_of("hello", "x")            // -1
 
 Convert a string to uppercase.
 
-```setsuna
+```typescript
 uppercase("hello")       // "HELLO"
 uppercase("Hello World") // "HELLO WORLD"
 uppercase("123abc")      // "123ABC"
@@ -149,7 +149,7 @@ uppercase("123abc")      // "123ABC"
 
 Convert a string to lowercase.
 
-```setsuna
+```typescript
 lowercase("HELLO")       // "hello"
 lowercase("Hello World") // "hello world"
 lowercase("123ABC")      // "123abc"
@@ -163,7 +163,7 @@ lowercase("123ABC")      // "123abc"
 
 Remove whitespace from both ends of a string.
 
-```setsuna
+```typescript
 trim("  hello  ")        // "hello"
 trim("\t\nhello\n\t")    // "hello"
 trim("hello")            // "hello"
@@ -175,7 +175,7 @@ trim("hello")            // "hello"
 
 Remove whitespace from the start of a string.
 
-```setsuna
+```typescript
 trim_start("  hello  ")  // "hello  "
 trim_start("\t\nhello")  // "hello"
 ```
@@ -186,7 +186,7 @@ trim_start("\t\nhello")  // "hello"
 
 Remove whitespace from the end of a string.
 
-```setsuna
+```typescript
 trim_end("  hello  ")    // "  hello"
 trim_end("hello\n\t")    // "hello"
 ```
@@ -199,7 +199,7 @@ trim_end("hello\n\t")    // "hello"
 
 Split a string by a delimiter into a list of strings.
 
-```setsuna
+```typescript
 split("a,b,c", ",")              // ["a", "b", "c"]
 split("hello world", " ")        // ["hello", "world"]
 split("one::two::three", "::")   // ["one", "two", "three"]
@@ -212,7 +212,7 @@ split("hello", "")               // ["h", "e", "l", "l", "o"]
 
 Join a list of strings with a delimiter.
 
-```setsuna
+```typescript
 join(["a", "b", "c"], ",")       // "a,b,c"
 join(["hello", "world"], " ")    // "hello world"
 join(["one", "two"], "")         // "onetwo"
@@ -227,7 +227,7 @@ join([], ",")                    // ""
 
 Replace the first occurrence of a pattern.
 
-```setsuna
+```typescript
 replace("hello world", "world", "there")  // "hello there"
 replace("aaa", "a", "b")                   // "baa"
 replace("hello", "x", "y")                 // "hello" (no match)
@@ -239,7 +239,7 @@ replace("hello", "x", "y")                 // "hello" (no match)
 
 Replace all occurrences of a pattern.
 
-```setsuna
+```typescript
 replace_all("hello world world", "world", "there")  // "hello there there"
 replace_all("aaa", "a", "b")                         // "bbb"
 replace_all("hello", "l", "L")                       // "heLLo"
@@ -251,7 +251,7 @@ replace_all("hello", "l", "L")                       // "heLLo"
 
 Use the `+` operator to concatenate strings:
 
-```setsuna
+```typescript
 "hello" + " " + "world"    // "hello world"
 "value: " + str(42)        // "value: 42"
 ```
@@ -264,7 +264,7 @@ You must use `str()` to convert non-string values before concatenation.
 
 ### Building Strings
 
-```setsuna
+```typescript
 fn format_person(name, age) {
     "Name: " + name + ", Age: " + str(age)
 }
@@ -274,7 +274,7 @@ format_person("Alice", 30)  // "Name: Alice, Age: 30"
 
 ### Parsing Input
 
-```setsuna
+```typescript
 fn parse_csv_line(line) {
     split(line, ",")
 }
@@ -284,7 +284,7 @@ parse_csv_line("Alice,30,Tokyo")  // ["Alice", "30", "Tokyo"]
 
 ### Validation
 
-```setsuna
+```typescript
 fn is_valid_email(email) {
     contains(email, "@") && contains(email, ".")
 }
@@ -296,7 +296,7 @@ fn is_valid_identifier(s) {
 
 ### String Transformation
 
-```setsuna
+```typescript
 fn normalize(s) {
     lowercase(trim(s))
 }
@@ -318,7 +318,7 @@ title_case("hello world")  // "Hello World"
 
 ### String Repetition
 
-```setsuna
+```typescript
 fn repeat(s, n) {
     fn helper(acc, count) {
         if count == 0 {
@@ -335,7 +335,7 @@ repeat("ab", 3)  // "ababab"
 
 ### Padding
 
-```setsuna
+```typescript
 fn pad_left(s, width, char) {
     let padding = width - len(s)
     if padding <= 0 {
@@ -360,11 +360,7 @@ pad_right("hi", 5, " ")  // "hi   "
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Built-in Functions" icon="toolbox" href="/reference/builtins">
-    All built-in functions
-  </Card>
-  <Card title="I/O Functions" icon="file" href="/reference/io">
-    Input/output operations
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Built-in Functions" href="/reference/builtins" />
+  <Card title="I/O Functions" href="/reference/io" />
+</Cards>

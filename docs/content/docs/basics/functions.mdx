@@ -11,7 +11,7 @@ Functions are first-class citizens in Setsuna. You can define named functions, c
 
 Define functions using the `fn` keyword:
 
-```setsuna
+```typescript
 fn greet(name) {
     print("Hello, " + name + "!")
 }
@@ -23,7 +23,7 @@ greet("World")  // Hello, World!
 
 For single-expression functions, use the arrow syntax:
 
-```setsuna
+```typescript
 fn square(x) => x * x
 fn add(a, b) => a + b
 
@@ -35,7 +35,7 @@ print(add(3, 4))   // 7
 
 Use blocks for functions with multiple expressions:
 
-```setsuna
+```typescript
 fn calculate(x, y) {
     let sum = x + y
     let product = x * y
@@ -53,7 +53,7 @@ Functions return the value of their last expression. There's no explicit `return
 
 Create functions without names using lambda syntax:
 
-```setsuna
+```typescript
 let double = (x) => x * 2
 let add = (a, b) => a + b
 
@@ -63,7 +63,7 @@ print(add(10, 5))  // 15
 
 ### Lambda Syntax Variations
 
-```setsuna
+```typescript
 // Single parameter
 (x) => x * 2
 
@@ -86,7 +86,7 @@ Functions that take or return other functions:
 
 ### Functions as Arguments
 
-```setsuna
+```typescript
 fn apply_twice(f, x) {
     f(f(x))
 }
@@ -100,7 +100,7 @@ print(apply_twice((x) => x + 1, 10))  // 12
 
 ### Functions Returning Functions
 
-```setsuna
+```typescript
 fn make_adder(n) {
     (x) => x + n  // Returns a function
 }
@@ -116,7 +116,7 @@ print(add10(3))  // 13
 
 Functions capture variables from their enclosing scope:
 
-```setsuna
+```typescript
 fn counter() {
     let count = 0
     () => {
@@ -138,7 +138,7 @@ Since Setsuna is purely functional with immutable bindings, closures capture val
 
 Functions can call themselves recursively:
 
-```setsuna
+```typescript
 fn factorial(n) {
     match n {
         0 => 1,
@@ -153,7 +153,7 @@ print(factorial(5))  // 120
 
 For better performance, use tail-recursive patterns:
 
-```setsuna
+```typescript
 fn factorial_tail(n) {
     fn helper(n, acc) {
         match n {
@@ -173,7 +173,7 @@ print(factorial_tail(5))  // 120
 
 Apply a function to each element:
 
-```setsuna
+```typescript
 fn map(f, lst) {
     match lst {
         [] => [],
@@ -190,7 +190,7 @@ print(squared)  // [1, 4, 9, 16, 25]
 
 Keep elements matching a predicate:
 
-```setsuna
+```typescript
 fn filter(pred, lst) {
     match lst {
         [] => [],
@@ -211,7 +211,7 @@ print(evens)  // [2, 4, 6]
 
 Combine elements into a single value:
 
-```setsuna
+```typescript
 fn fold(f, init, lst) {
     match lst {
         [] => init,
@@ -228,7 +228,7 @@ print(sum)  // 15
 
 Combine functions to create new ones:
 
-```setsuna
+```typescript
 fn compose(f, g) {
     (x) => f(g(x))
 }
@@ -242,11 +242,7 @@ print(double_then_add1(5))  // 11 (5*2 + 1)
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="Control Flow" icon="code-branch" href="/basics/control-flow">
-    Learn about conditionals and expressions
-  </Card>
-  <Card title="Pattern Matching" icon="puzzle-piece" href="/advanced/pattern-matching">
-    Master pattern matching in functions
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="Control Flow" href="/basics/control-flow" />
+  <Card title="Pattern Matching" href="/advanced/pattern-matching" />
+</Cards>

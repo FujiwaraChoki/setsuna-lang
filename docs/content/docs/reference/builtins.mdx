@@ -32,7 +32,7 @@ The Standard Library functions are loaded automatically from `stdlib/prelude.sts
 
 Output a value to the console.
 
-```setsuna
+```typescript
 print("Hello, World!")     // Hello, World!
 print(42)                  // 42
 print([1, 2, 3])           // [1, 2, 3]
@@ -45,7 +45,7 @@ print({ name: "Alice" })   // { name: "Alice" }
 
 Alias for `print`. Output a value to the console with a newline.
 
-```setsuna
+```typescript
 println("Hello, World!")
 ```
 
@@ -55,7 +55,7 @@ println("Hello, World!")
 
 Read a line from standard input (no prompt).
 
-```setsuna
+```typescript
 let name = input()
 print("Hello, " + name)
 ```
@@ -66,7 +66,7 @@ print("Hello, " + name)
 
 Display a prompt and read a line from standard input.
 
-```setsuna
+```typescript
 let name = input_prompt("Enter your name: ")
 print("Hello, " + name)
 ```
@@ -79,7 +79,7 @@ print("Hello, " + name)
 
 Convert any value to its string representation.
 
-```setsuna
+```typescript
 str(42)        // "42"
 str(3.14)      // "3.14"
 str(true)      // "true"
@@ -92,7 +92,7 @@ str([1, 2])    // "[1, 2]"
 
 Convert a value to an integer.
 
-```setsuna
+```typescript
 int("42")      // 42
 int(3.7)       // 3
 int(true)      // 1
@@ -105,7 +105,7 @@ int(false)     // 0
 
 Convert a value to a floating-point number.
 
-```setsuna
+```typescript
 float("3.14")  // 3.14
 float(42)      // 42.0
 ```
@@ -118,7 +118,7 @@ Functions to check the type of a value at runtime.
 
 ### is_int
 
-```setsuna
+```typescript
 is_int(42)       // true
 is_int(3.14)     // false
 is_int("42")     // false
@@ -128,7 +128,7 @@ is_int("42")     // false
 
 ### is_float
 
-```setsuna
+```typescript
 is_float(3.14)   // true
 is_float(42)     // false
 ```
@@ -137,7 +137,7 @@ is_float(42)     // false
 
 ### is_string
 
-```setsuna
+```typescript
 is_string("hello")  // true
 is_string(42)       // false
 ```
@@ -146,7 +146,7 @@ is_string(42)       // false
 
 ### is_bool
 
-```setsuna
+```typescript
 is_bool(true)    // true
 is_bool(false)   // true
 is_bool(1)       // false
@@ -156,7 +156,7 @@ is_bool(1)       // false
 
 ### is_list
 
-```setsuna
+```typescript
 is_list([1, 2, 3])  // true
 is_list([])         // true
 is_list((1, 2))     // false
@@ -166,7 +166,7 @@ is_list((1, 2))     // false
 
 ### is_tuple
 
-```setsuna
+```typescript
 is_tuple((1, 2))    // true
 is_tuple([1, 2])    // false
 ```
@@ -175,7 +175,7 @@ is_tuple([1, 2])    // false
 
 ### is_record
 
-```setsuna
+```typescript
 is_record({ x: 1 })  // true
 is_record([1, 2])    // false
 ```
@@ -186,7 +186,7 @@ is_record([1, 2])    // false
 
 Check if a value is a function (closure or builtin).
 
-```setsuna
+```typescript
 is_fn((x) => x * 2)  // true
 is_fn(print)         // true
 is_fn(42)            // false
@@ -200,7 +200,7 @@ is_fn(42)            // false
 
 Get the first element of a list.
 
-```setsuna
+```typescript
 head([1, 2, 3])    // 1
 head(["a", "b"])   // "a"
 head([])           // Error: empty list
@@ -212,7 +212,7 @@ head([])           // Error: empty list
 
 Get all elements except the first.
 
-```setsuna
+```typescript
 tail([1, 2, 3])    // [2, 3]
 tail([1])          // []
 tail([])           // Error: empty list
@@ -224,7 +224,7 @@ tail([])           // Error: empty list
 
 Prepend an element to a list.
 
-```setsuna
+```typescript
 cons(1, [2, 3])        // [1, 2, 3]
 cons("a", [])          // ["a"]
 cons(0, cons(1, []))   // [0, 1]
@@ -236,7 +236,7 @@ cons(0, cons(1, []))   // [0, 1]
 
 Get the length of a list or string.
 
-```setsuna
+```typescript
 len([1, 2, 3])     // 3
 len([])            // 0
 len("hello")       // 5
@@ -248,7 +248,7 @@ len("hello")       // 5
 
 Check if a list is empty.
 
-```setsuna
+```typescript
 empty([])          // true
 empty([1, 2])      // false
 ```
@@ -259,7 +259,7 @@ empty([1, 2])      // false
 
 Reverse a list.
 
-```setsuna
+```typescript
 reverse([1, 2, 3])     // [3, 2, 1]
 reverse([])            // []
 reverse(["a", "b"])    // ["b", "a"]
@@ -271,7 +271,7 @@ reverse(["a", "b"])    // ["b", "a"]
 
 Append an element to the end of a list.
 
-```setsuna
+```typescript
 append([1, 2], 3)          // [1, 2, 3]
 append([], 1)              // [1]
 ```
@@ -282,7 +282,7 @@ append([], 1)              // [1]
 
 Concatenate two lists.
 
-```setsuna
+```typescript
 concat([1, 2], [3, 4])     // [1, 2, 3, 4]
 concat([], [1, 2])         // [1, 2]
 concat([1], [])            // [1]
@@ -294,7 +294,7 @@ concat([1], [])            // [1]
 
 Get the element at a specific index (0-based).
 
-```setsuna
+```typescript
 nth([10, 20, 30], 0)       // 10
 nth([10, 20, 30], 2)       // 30
 nth([10, 20, 30], 5)       // Error: index out of bounds
@@ -306,7 +306,7 @@ nth([10, 20, 30], 5)       // Error: index out of bounds
 
 Generate a list of integers from start (inclusive) to end (exclusive).
 
-```setsuna
+```typescript
 range(0, 5)                // [0, 1, 2, 3, 4]
 range(1, 4)                // [1, 2, 3]
 range(5, 5)                // []
@@ -318,7 +318,7 @@ range(5, 5)                // []
 
 Sort a list of numbers or strings in ascending order.
 
-```setsuna
+```typescript
 sort([3, 1, 4, 1, 5])      // [1, 1, 3, 4, 5]
 sort(["c", "a", "b"])      // ["a", "b", "c"]
 sort([])                   // []
@@ -332,7 +332,7 @@ sort([])                   // []
 
 Absolute value.
 
-```setsuna
+```typescript
 abs(-5)      // 5
 abs(5)       // 5
 abs(-3.14)   // 3.14
@@ -344,7 +344,7 @@ abs(-3.14)   // 3.14
 
 Square root.
 
-```setsuna
+```typescript
 sqrt(16)     // 4.0
 sqrt(2)      // 1.41421...
 ```
@@ -355,7 +355,7 @@ sqrt(2)      // 1.41421...
 
 Exponentiation.
 
-```setsuna
+```typescript
 pow(2, 3)    // 8
 pow(2, 0.5)  // 1.41421...
 pow(10, -1)  // 0.1
@@ -367,7 +367,7 @@ pow(10, -1)  // 0.1
 
 Minimum of two values.
 
-```setsuna
+```typescript
 min(3, 5)      // 3
 min(-1, 1)     // -1
 min(3.14, 2.71)  // 2.71
@@ -379,7 +379,7 @@ min(3.14, 2.71)  // 2.71
 
 Maximum of two values.
 
-```setsuna
+```typescript
 max(3, 5)      // 5
 max(-1, 1)     // 1
 max(3.14, 2.71)  // 3.14
@@ -391,7 +391,7 @@ max(3.14, 2.71)  // 3.14
 
 Round down to nearest integer.
 
-```setsuna
+```typescript
 floor(3.7)     // 3
 floor(-3.2)    // -4
 floor(5.0)     // 5
@@ -403,7 +403,7 @@ floor(5.0)     // 5
 
 Round up to nearest integer.
 
-```setsuna
+```typescript
 ceil(3.2)      // 4
 ceil(-3.7)     // -3
 ceil(5.0)      // 5
@@ -415,7 +415,7 @@ ceil(5.0)      // 5
 
 Round to nearest integer.
 
-```setsuna
+```typescript
 round(3.4)     // 3
 round(3.5)     // 4
 round(-3.5)    // -4
@@ -429,7 +429,7 @@ round(-3.5)    // -4
 
 Get the type of a value as a string.
 
-```setsuna
+```typescript
 type(42)           // "Int"
 type(3.14)         // "Float"
 type("hello")      // "String"
@@ -446,7 +446,7 @@ type((x) => x)     // "Function"
 
 Throw a runtime error with a message.
 
-```setsuna
+```typescript
 fn divide(a, b) {
     if b == 0 {
         error("Division by zero")
@@ -462,7 +462,7 @@ fn divide(a, b) {
 
 Assert that a condition is true, or throw an error with a message.
 
-```setsuna
+```typescript
 assert(x > 0, "x must be positive")
 assert(len(list) > 0, "list cannot be empty")
 ```
@@ -473,7 +473,7 @@ assert(len(list) > 0, "list cannot be empty")
 
 Compare two values, returning -1, 0, or 1.
 
-```setsuna
+```typescript
 compare(1, 2)        // -1
 compare(2, 2)        // 0
 compare(3, 2)        // 1
@@ -485,17 +485,9 @@ compare("b", "a")    // 1
 
 ## Next Steps
 
-<CardGroup cols={2}>
-  <Card title="List Operations" icon="list" href="/reference/list-ops">
-    Higher-order functions and list utilities
-  </Card>
-  <Card title="Math Functions" icon="calculator" href="/reference/math">
-    Extended math and trigonometry
-  </Card>
-  <Card title="String Functions" icon="font" href="/reference/strings">
-    String manipulation functions
-  </Card>
-  <Card title="I/O Functions" icon="file" href="/reference/io">
-    Console and file operations
-  </Card>
-</CardGroup>
+<Cards>
+  <Card title="List Operations" href="/reference/list-ops" />
+  <Card title="Math Functions" href="/reference/math" />
+  <Card title="String Functions" href="/reference/strings" />
+  <Card title="I/O Functions" href="/reference/io" />
+</Cards>

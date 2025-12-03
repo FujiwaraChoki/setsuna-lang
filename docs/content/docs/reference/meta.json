@@ -1,0 +1,14 @@
+{
+  "title": "Reference",
+  "pages": [
+    "---Built-in Functions---",
+    "builtins",
+    "list-ops",
+    "math",
+    "strings",
+    "io",
+    "---Syntax Reference---",
+    "grammar",
+    "operators"
+  ]
+}
