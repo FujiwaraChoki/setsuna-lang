@@ -16,6 +16,7 @@ enum class TokenType {
 
     // Keywords
     LET,
+    CONST,
     FN,
     IF,
     ELSE,

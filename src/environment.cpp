@@ -1,25 +1,34 @@
 #include "environment.hpp"
 #include "builtins.hpp"
+#include "error.hpp"
 
 namespace setsuna {
 
-void Environment::define(const std::string& name, ValuePtr value) {
+void Environment::define(const std::string& name, ValuePtr value, bool isConst) {
+    if (!isConst && constNames_.count(name) > 0) {
+        throw RuntimeError("Cannot redeclare const '" + name + "' with let");
+    }
     bindings_[name] = value;
+    if (isConst) {
+        constNames_.insert(name);
+    }
 }
 
-void Environment::set(const std::string& name, ValuePtr value) {
+void Environment::set(const std::string& name, ValuePtr value, const SourceLocation& loc) {
     // Look for existing binding in scope chain
     Environment* env = this;
     while (env) {
         auto it = env->bindings_.find(name);
         if (it != env->bindings_.end()) {
+            if (env->constNames_.count(name) > 0) {
+                throw RuntimeError("Cannot reassign const variable '" + name + "'", loc);
+            }
             it->second = value;
             return;
         }
         env = env->parent_.get();
     }
-    // If not found, define in current scope
-    bindings_[name] = value;
+    throw RuntimeError("Undefined variable: " + name, loc);
 }
 
 std::optional<ValuePtr> Environment::get(const std::string& name) const {
@@ -36,6 +45,12 @@ std::optional<ValuePtr> Environment::get(const std::string& name) const {
 bool Environment::has(const std::string& name) const {
     if (bindings_.count(name) > 0) return true;
     if (parent_) return parent_->has(name);
+    return false;
+}
+
+bool Environment::isConst(const std::string& name) const {
+    if (constNames_.count(name) > 0) return true;
+    if (parent_) return parent_->isConst(name);
     return false;
 }
 

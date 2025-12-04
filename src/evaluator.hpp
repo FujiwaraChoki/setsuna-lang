@@ -35,6 +35,7 @@ private:
     ValuePtr evalBinaryOp(const BinaryOp& op, EnvPtr env);
     ValuePtr evalUnaryOp(const UnaryOp& op, EnvPtr env);
     ValuePtr evalLetExpr(const LetExpr& let, EnvPtr env);
+    ValuePtr evalAssignExpr(const AssignExpr& assign, EnvPtr env);
     ValuePtr evalFnDef(const FnDef& fn, EnvPtr env);
     ValuePtr evalLambda(const Lambda& lambda, EnvPtr env);
     ValuePtr evalCall(const Call& call, EnvPtr env);

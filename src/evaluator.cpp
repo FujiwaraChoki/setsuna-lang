@@ -186,6 +186,8 @@ ValuePtr Evaluator::eval(const ExprPtr& expr, EnvPtr env) {
             return evalUnaryOp(e, env);
         } else if constexpr (std::is_same_v<T, LetExpr>) {
             return evalLetExpr(e, env);
+        } else if constexpr (std::is_same_v<T, AssignExpr>) {
+            return evalAssignExpr(e, env);
         } else if constexpr (std::is_same_v<T, FnDef>) {
             return evalFnDef(e, env);
         } else if constexpr (std::is_same_v<T, Lambda>) {
@@ -337,7 +339,16 @@ ValuePtr Evaluator::evalUnaryOp(const UnaryOp& op, EnvPtr env) {
 
 ValuePtr Evaluator::evalLetExpr(const LetExpr& let, EnvPtr env) {
     auto val = eval(let.value, env);
-    env->define(let.name, val);
+    env->define(let.name, val, let.isConst);
+    return val;
+}
+
+ValuePtr Evaluator::evalAssignExpr(const AssignExpr& assign, EnvPtr env) {
+    if (!env->has(assign.name)) {
+        throw RuntimeError("Undefined variable: " + assign.name, assign.loc);
+    }
+    auto val = eval(assign.value, env);
+    env->set(assign.name, val, assign.loc);
     return val;
 }
 

@@ -17,7 +17,8 @@
       "Bash(bun create:*)",
       "Bash(../build/setsuna print.stsn:*)",
       "Bash(find:*)",
-      "Bash(bun run dev)"
+      "Bash(bun run dev)",
+      "Bash(/Users/choki/Dev/Personal/setsuna-lang/build/setsuna)"
     ],
     "deny": [],
     "ask": []

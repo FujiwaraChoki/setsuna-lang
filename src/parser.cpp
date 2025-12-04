@@ -174,7 +174,7 @@ ImportDecl Parser::parseImportDecl() {
 ExprPtr Parser::parseExpr() {
     skipNewlines();
 
-    if (check(TokenType::LET)) return parseLetExpr();
+    if (check(TokenType::LET) || check(TokenType::CONST)) return parseLetExpr();
     if (check(TokenType::FN)) return parseFnDef();
     if (check(TokenType::IF)) return parseIfExpr();
     if (check(TokenType::MATCH)) return parseMatchExpr();
@@ -196,7 +196,13 @@ ExprPtr Parser::parseExpr() {
 
 ExprPtr Parser::parseLetExpr() {
     SourceLocation loc = current().location;
-    expect(TokenType::LET, "Expected 'let'");
+
+    bool isConst = check(TokenType::CONST);
+    if (isConst) {
+        expect(TokenType::CONST, "Expected 'const'");
+    } else {
+        expect(TokenType::LET, "Expected 'let'");
+    }
 
     Token nameTok = expect(TokenType::IDENT, "Expected identifier");
     std::string name = nameTok.asString();
@@ -210,7 +216,7 @@ ExprPtr Parser::parseLetExpr() {
     ExprPtr value = parseExpr();
     match(TokenType::SEMICOLON);
 
-    return makeExpr(LetExpr{name, typeAnnotation, value, loc});
+    return makeExpr(LetExpr{name, typeAnnotation, value, isConst, loc});
 }
 
 ExprPtr Parser::parseFnDef() {
@@ -460,11 +466,20 @@ ExprPtr Parser::parsePrimary() {
         return makeExpr(BoolLiteral{false, loc});
     }
 
-    // Identifier (field access and module access handled in parseCall)
+    // Identifier or assignment (field access and module access handled in parseCall)
     if (check(TokenType::IDENT)) {
         std::string name = current().asString();
+        SourceLocation identLoc = current().location;
         advance();
-        return makeExpr(Identifier{name, loc});
+
+        // Check for assignment: x = value
+        if (check(TokenType::ASSIGN)) {
+            advance();
+            ExprPtr value = parseExpr();
+            return makeExpr(AssignExpr{name, value, identLoc});
+        }
+
+        return makeExpr(Identifier{name, identLoc});
     }
 
     // Parenthesized expr, tuple, or lambda

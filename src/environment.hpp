@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <memory>
 #include <optional>
 #include "value.hpp"
@@ -15,10 +16,11 @@ public:
     Environment(EnvPtr parent) : parent_(parent) {}
 
     // Variable operations
-    void define(const std::string& name, ValuePtr value);
-    void set(const std::string& name, ValuePtr value);
+    void define(const std::string& name, ValuePtr value, bool isConst = false);
+    void set(const std::string& name, ValuePtr value, const SourceLocation& loc);
     std::optional<ValuePtr> get(const std::string& name) const;
     bool has(const std::string& name) const;
+    bool isConst(const std::string& name) const;
 
     // Type definitions
     void defineType(const std::string& name, const TypeDef& def);
@@ -37,6 +39,7 @@ public:
 private:
     EnvPtr parent_;
     std::unordered_map<std::string, ValuePtr> bindings_;
+    std::unordered_set<std::string> constNames_;
     std::unordered_map<std::string, TypeDef> types_;
     std::unordered_map<std::string, EnvPtr> modules_;
 };

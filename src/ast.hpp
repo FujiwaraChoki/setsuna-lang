@@ -68,6 +68,13 @@ struct LetExpr {
     std::string name;
     std::optional<TypeExprPtr> typeAnnotation;
     ExprPtr value;
+    bool isConst;
+    SourceLocation loc;
+};
+
+struct AssignExpr {
+    std::string name;
+    ExprPtr value;
     SourceLocation loc;
 };
 
@@ -160,6 +167,7 @@ using ExprVariant = std::variant<
     BinaryOp,
     UnaryOp,
     LetExpr,
+    AssignExpr,
     FnDef,
     Lambda,
     Call,

@@ -6,6 +6,7 @@ namespace setsuna {
 
 static const std::unordered_map<std::string, TokenType> keywords = {
     {"let", TokenType::LET},
+    {"const", TokenType::CONST},
     {"fn", TokenType::FN},
     {"if", TokenType::IF},
     {"else", TokenType::ELSE},
@@ -24,6 +25,7 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::STRING: return "STRING";
         case TokenType::IDENT: return "IDENT";
         case TokenType::LET: return "LET";
+        case TokenType::CONST: return "CONST";
         case TokenType::FN: return "FN";
         case TokenType::IF: return "IF";
         case TokenType::ELSE: return "ELSE";
