@@ -40,3 +40,5 @@ docs/node_modules/
 # Environment
 .env
 .env.local
+
+.cache
