@@ -1,0 +1,462 @@
+---
+title: HTTP & JSON
+description: HTTP requests and JSON handling in Setsuna
+---
+
+# HTTP & JSON
+
+Setsuna provides built-in functions for making HTTP/HTTPS requests and working with JSON data.
+
+## HTTP Functions Overview
+
+| Function | Description |
+|----------|-------------|
+| `http_get` | Simple GET request |
+| `http_post` | Simple POST request |
+| `http_request` | Advanced request with full control |
+| `url_encode` | URL encode a string |
+| `url_decode` | URL decode a string |
+
+## JSON Functions Overview
+
+| Function | Description |
+|----------|-------------|
+| `json_parse` | Parse JSON string to Setsuna values |
+| `json_stringify` | Convert value to JSON string |
+| `json_pretty` | Convert value to formatted JSON string |
+
+## HTTP GET Request
+
+### http_get
+
+Make a simple HTTP GET request. Returns the response body as a string.
+
+```typescript
+let response = http_get("https://api.example.com/data")
+print(response)
+```
+
+**Signature:** `http_get(url) -> String`
+
+### Example: Fetching JSON Data
+
+```typescript
+let response = http_get("https://jsonplaceholder.typicode.com/posts/1")
+let post = json_parse(response)
+
+print("Title: " + post.title)
+print("Body: " + post.body)
+```
+
+## HTTP POST Request
+
+### http_post
+
+Make a simple HTTP POST request with a body. Returns the response body as a string.
+
+```typescript
+let body = "name=John&age=30"
+let response = http_post("https://api.example.com/users", body)
+print(response)
+```
+
+**Signature:** `http_post(url, body) -> String`
+
+### Example: Posting JSON Data
+
+```typescript
+let data = json_stringify({
+    title: "Hello",
+    body: "World",
+    userId: 1
+})
+
+let response = http_post("https://jsonplaceholder.typicode.com/posts", data)
+let result = json_parse(response)
+print("Created post with ID: " + str(result.id))
+```
+
+## Advanced HTTP Requests
+
+### http_request
+
+Make an HTTP request with full control over method, headers, body, and timeout.
+
+```typescript
+let response = http_request({
+    url: "https://api.example.com/data",
+    method: "PUT",
+    headers: {
+        Authorization: "Bearer token123",
+        ContentType: "application/json"
+    },
+    body: json_stringify({ status: "active" }),
+    timeout: 60
+})
+
+print("Status: " + str(response.status))
+print("Body: " + response.body)
+```
+
+**Signature:** `http_request(options) -> Record`
+
+### Options Record
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `url` | String | Yes | - | The request URL |
+| `method` | String | No | "GET" | HTTP method (GET, POST, PUT, DELETE, etc.) |
+| `headers` | Record | No | {} | Custom request headers |
+| `body` | String | No | "" | Request body |
+| `timeout` | Int | No | 30 | Timeout in seconds |
+
+### Response Record
+
+The `http_request` function returns a record with:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | Int | HTTP status code (200, 404, etc.) |
+| `body` | String | Response body |
+| `headers` | Record | Response headers |
+
+### Example: Full Request Cycle
+
+```typescript
+fn api_call(method, endpoint, data) {
+    let response = http_request({
+        url: "https://api.example.com" + endpoint,
+        method: method,
+        headers: {
+            ContentType: "application/json",
+            Accept: "application/json"
+        },
+        body: if data != () { json_stringify(data) } else { "" },
+        timeout: 30
+    })
+
+    if response.status >= 200 && response.status < 300 {
+        json_parse(response.body)
+    } else {
+        error("API error: " + str(response.status))
+    }
+}
+
+// Usage
+let user = api_call("GET", "/users/1", ())
+let newUser = api_call("POST", "/users", { name: "Alice", email: "alice@example.com" })
+```
+
+## URL Encoding
+
+### url_encode
+
+URL encode a string for safe use in URLs.
+
+```typescript
+url_encode("hello world")     // "hello%20world"
+url_encode("name=John&age=30") // "name%3DJohn%26age%3D30"
+url_encode("price=$100")      // "price%3D%24100"
+```
+
+**Signature:** `url_encode(string) -> String`
+
+### url_decode
+
+Decode a URL-encoded string.
+
+```typescript
+url_decode("hello%20world")   // "hello world"
+url_decode("name%3DJohn")     // "name=John"
+```
+
+**Signature:** `url_decode(string) -> String`
+
+### Example: Building Query Strings
+
+```typescript
+fn build_query(params) {
+    let pairs = map((key) => {
+        key + "=" + url_encode(str(params.key))
+    }, keys(params))
+    join(pairs, "&")
+}
+
+// Manual approach
+let query = "name=" + url_encode("John Doe") + "&city=" + url_encode("New York")
+let url = "https://api.example.com/search?" + query
+print(url)  // https://api.example.com/search?name=John%20Doe&city=New%20York
+```
+
+## JSON Parsing
+
+### json_parse
+
+Parse a JSON string into Setsuna values.
+
+```typescript
+// Objects become records
+let obj = json_parse("{\"name\": \"Alice\", \"age\": 30}")
+print(obj.name)  // "Alice"
+print(obj.age)   // 30
+
+// Arrays become lists
+let arr = json_parse("[1, 2, 3]")
+print(arr)       // [1, 2, 3]
+
+// Nested structures
+let data = json_parse("{\"users\": [{\"name\": \"Alice\"}, {\"name\": \"Bob\"}]}")
+print(data.users)  // [{name: "Alice"}, {name: "Bob"}]
+```
+
+**Signature:** `json_parse(string) -> Value`
+
+### Type Mappings
+
+| JSON Type | Setsuna Type |
+|-----------|--------------|
+| object | Record |
+| array | List |
+| string | String |
+| number (integer) | Int |
+| number (decimal) | Float |
+| boolean | Bool |
+| null | () (Unit) |
+
+### Example: Working with API Responses
+
+```typescript
+let response = http_get("https://jsonplaceholder.typicode.com/users")
+let users = json_parse(response)
+
+// Process each user
+let names = map((user) => user.name, users)
+print("Users: " + join(names, ", "))
+
+// Filter users
+let filtered = filter((user) => contains(user.email, ".com"), users)
+print("Found " + str(len(filtered)) + " users with .com emails")
+```
+
+## JSON Stringifying
+
+### json_stringify
+
+Convert a Setsuna value to a compact JSON string.
+
+```typescript
+json_stringify({ name: "Alice", age: 30 })
+// {"name":"Alice","age":30}
+
+json_stringify([1, 2, 3])
+// [1,2,3]
+
+json_stringify("hello")
+// "hello"
+
+json_stringify(true)
+// true
+
+json_stringify(())
+// null
+```
+
+**Signature:** `json_stringify(value) -> String`
+
+### json_pretty
+
+Convert a Setsuna value to a formatted (pretty-printed) JSON string.
+
+```typescript
+let data = {
+    name: "Alice",
+    age: 30,
+    hobbies: ["reading", "coding"]
+}
+
+print(json_pretty(data))
+```
+
+**Output:**
+```json
+{
+  "name": "Alice",
+  "age": 30,
+  "hobbies": [
+    "reading",
+    "coding"
+  ]
+}
+```
+
+**Signature:** `json_pretty(value) -> String`
+
+## Common Patterns
+
+### REST API Client
+
+```typescript
+fn create_api_client(base_url, auth_token) {
+    {
+        get: (endpoint) => {
+            let response = http_request({
+                url: base_url + endpoint,
+                method: "GET",
+                headers: { Authorization: "Bearer " + auth_token }
+            })
+            json_parse(response.body)
+        },
+
+        post: (endpoint, data) => {
+            let response = http_request({
+                url: base_url + endpoint,
+                method: "POST",
+                headers: {
+                    Authorization: "Bearer " + auth_token,
+                    ContentType: "application/json"
+                },
+                body: json_stringify(data)
+            })
+            json_parse(response.body)
+        },
+
+        delete: (endpoint) => {
+            let response = http_request({
+                url: base_url + endpoint,
+                method: "DELETE",
+                headers: { Authorization: "Bearer " + auth_token }
+            })
+            response.status == 204 || response.status == 200
+        }
+    }
+}
+
+// Usage
+let api = create_api_client("https://api.example.com", "my-token")
+let users = api.get("/users")
+let newUser = api.post("/users", { name: "Alice" })
+```
+
+### Handling Errors
+
+```typescript
+fn safe_fetch(url) {
+    let response = http_request({
+        url: url,
+        method: "GET",
+        timeout: 10
+    })
+
+    match response.status {
+        200 => { success: true, data: json_parse(response.body) },
+        404 => { success: false, error: "Not found" },
+        500 => { success: false, error: "Server error" },
+        _ => { success: false, error: "HTTP " + str(response.status) }
+    }
+}
+
+let result = safe_fetch("https://api.example.com/data")
+if result.success {
+    print("Data: " + json_pretty(result.data))
+} else {
+    print("Error: " + result.error)
+}
+```
+
+### Caching Responses
+
+```typescript
+fn cached_fetch(url, cache_file) {
+    if file_exists(cache_file) {
+        // Return cached data
+        json_parse(file_read(cache_file))
+    } else {
+        // Fetch and cache
+        let response = http_get(url)
+        file_write(cache_file, response)
+        json_parse(response)
+    }
+}
+
+let data = cached_fetch("https://api.example.com/data", "cache/data.json")
+```
+
+### Working with Form Data
+
+```typescript
+fn post_form(url, fields) {
+    // Build form-encoded body
+    fn encode_field(key, value) {
+        url_encode(key) + "=" + url_encode(str(value))
+    }
+
+    let pairs = [
+        encode_field("name", fields.name),
+        encode_field("email", fields.email)
+    ]
+    let body = join(pairs, "&")
+
+    http_request({
+        url: url,
+        method: "POST",
+        headers: { ContentType: "application/x-www-form-urlencoded" },
+        body: body
+    })
+}
+
+post_form("https://api.example.com/submit", {
+    name: "John Doe",
+    email: "john@example.com"
+})
+```
+
+### Pagination
+
+```typescript
+fn fetch_all_pages(base_url) {
+    fn fetch_page(page, acc) {
+        let url = base_url + "?page=" + str(page)
+        let response = json_parse(http_get(url))
+
+        let items = concat(acc, response.data)
+
+        if response.has_more {
+            fetch_page(page + 1, items)
+        } else {
+            items
+        }
+    }
+
+    fetch_page(1, [])
+}
+
+let all_users = fetch_all_pages("https://api.example.com/users")
+```
+
+## Error Handling
+
+HTTP functions throw errors on network failures:
+
+```typescript
+// This will throw if the network request fails
+let response = http_get("https://invalid-url.example")
+// Error: http_get: Could not resolve host
+```
+
+JSON parsing throws on invalid JSON:
+
+```typescript
+let data = json_parse("invalid json")
+// Error: json_parse: unexpected character 'i'
+```
+
+<Warning>
+Always validate URLs and handle potential network errors in production code.
+</Warning>
+
+## Next Steps
+
+<Cards>
+  <Card title="I/O Functions" href="/reference/io" />
+  <Card title="String Functions" href="/reference/strings" />
+</Cards>

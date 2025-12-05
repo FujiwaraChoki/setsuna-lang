@@ -17,6 +17,10 @@ add_executable(setsuna
 
 target_include_directories(setsuna PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
+# Find and link libcurl for HTTP support
+find_package(CURL REQUIRED)
+target_link_libraries(setsuna PRIVATE CURL::libcurl)
+
 # Warnings
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(setsuna PRIVATE -Wall -Wextra -Wpedantic)

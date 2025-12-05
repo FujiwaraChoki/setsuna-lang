@@ -18,7 +18,11 @@
       "Bash(../build/setsuna print.stsn:*)",
       "Bash(find:*)",
       "Bash(bun run dev)",
-      "Bash(/Users/choki/Dev/Personal/setsuna-lang/build/setsuna)"
+      "Bash(/Users/choki/Dev/Personal/setsuna-lang/build/setsuna)",
+      "Bash(/Users/choki/Developer/playground/setsuna-lang/build/setsuna:*)",
+      "Bash(open \"raycast://extensions/raycast/raycast/confetti\")",
+      "Bash(wc:*)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []

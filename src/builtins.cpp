@@ -8,6 +8,7 @@
 #include <cctype>
 #include <fstream>
 #include <filesystem>
+#include <curl/curl.h>
 
 namespace fs = std::filesystem;
 
@@ -16,6 +17,348 @@ namespace setsuna {
 // Random number generator for random() and random_int()
 static std::random_device rd;
 static std::mt19937 gen(rd());
+
+// ============ HTTP Helper Functions ============
+
+// CURL write callback - collects response body
+static size_t curlWriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
+    size_t totalSize = size * nmemb;
+    output->append(static_cast<char*>(contents), totalSize);
+    return totalSize;
+}
+
+// CURL header callback - collects response headers
+static size_t curlHeaderCallback(char* buffer, size_t size, size_t nitems, std::vector<std::pair<std::string, std::string>>* headers) {
+    size_t totalSize = size * nitems;
+    std::string line(buffer, totalSize);
+
+    // Remove trailing \r\n
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) {
+        line.pop_back();
+    }
+
+    // Parse header line
+    size_t colonPos = line.find(':');
+    if (colonPos != std::string::npos) {
+        std::string key = line.substr(0, colonPos);
+        std::string value = line.substr(colonPos + 1);
+        // Trim leading whitespace from value
+        size_t start = value.find_first_not_of(" \t");
+        if (start != std::string::npos) {
+            value = value.substr(start);
+        }
+        headers->emplace_back(key, value);
+    }
+
+    return totalSize;
+}
+
+// JSON Parser for http responses
+class JsonParser {
+public:
+    static ValuePtr parse(const std::string& json) {
+        size_t pos = 0;
+        return parseValue(json, pos);
+    }
+
+private:
+    static void skipWhitespace(const std::string& json, size_t& pos) {
+        while (pos < json.size() && std::isspace(json[pos])) {
+            pos++;
+        }
+    }
+
+    static ValuePtr parseValue(const std::string& json, size_t& pos) {
+        skipWhitespace(json, pos);
+        if (pos >= json.size()) {
+            throw RuntimeError("json_parse: unexpected end of input");
+        }
+
+        char c = json[pos];
+        if (c == '{') return parseObject(json, pos);
+        if (c == '[') return parseArray(json, pos);
+        if (c == '"') return parseString(json, pos);
+        if (c == 't' || c == 'f') return parseBool(json, pos);
+        if (c == 'n') return parseNull(json, pos);
+        if (c == '-' || std::isdigit(c)) return parseNumber(json, pos);
+
+        throw RuntimeError("json_parse: unexpected character '" + std::string(1, c) + "'");
+    }
+
+    static ValuePtr parseObject(const std::string& json, size_t& pos) {
+        pos++; // Skip '{'
+        skipWhitespace(json, pos);
+
+        RecordValue record;
+
+        if (pos < json.size() && json[pos] == '}') {
+            pos++;
+            return makeRecord(record);
+        }
+
+        while (true) {
+            skipWhitespace(json, pos);
+
+            // Parse key
+            if (json[pos] != '"') {
+                throw RuntimeError("json_parse: expected string key in object");
+            }
+            auto keyVal = parseString(json, pos);
+            std::string key = keyVal->asString();
+
+            skipWhitespace(json, pos);
+            if (json[pos] != ':') {
+                throw RuntimeError("json_parse: expected ':' after object key");
+            }
+            pos++; // Skip ':'
+
+            // Parse value
+            auto value = parseValue(json, pos);
+            record.fields[key] = value;
+
+            skipWhitespace(json, pos);
+            if (json[pos] == '}') {
+                pos++;
+                break;
+            }
+            if (json[pos] != ',') {
+                throw RuntimeError("json_parse: expected ',' or '}' in object");
+            }
+            pos++; // Skip ','
+        }
+
+        return makeRecord(record);
+    }
+
+    static ValuePtr parseArray(const std::string& json, size_t& pos) {
+        pos++; // Skip '['
+        skipWhitespace(json, pos);
+
+        std::vector<ValuePtr> elements;
+
+        if (pos < json.size() && json[pos] == ']') {
+            pos++;
+            return makeList(elements);
+        }
+
+        while (true) {
+            auto value = parseValue(json, pos);
+            elements.push_back(value);
+
+            skipWhitespace(json, pos);
+            if (json[pos] == ']') {
+                pos++;
+                break;
+            }
+            if (json[pos] != ',') {
+                throw RuntimeError("json_parse: expected ',' or ']' in array");
+            }
+            pos++; // Skip ','
+        }
+
+        return makeList(elements);
+    }
+
+    static ValuePtr parseString(const std::string& json, size_t& pos) {
+        pos++; // Skip opening '"'
+        std::string result;
+
+        while (pos < json.size() && json[pos] != '"') {
+            if (json[pos] == '\\') {
+                pos++;
+                if (pos >= json.size()) {
+                    throw RuntimeError("json_parse: unexpected end in string escape");
+                }
+                switch (json[pos]) {
+                    case '"': result += '"'; break;
+                    case '\\': result += '\\'; break;
+                    case '/': result += '/'; break;
+                    case 'b': result += '\b'; break;
+                    case 'f': result += '\f'; break;
+                    case 'n': result += '\n'; break;
+                    case 'r': result += '\r'; break;
+                    case 't': result += '\t'; break;
+                    case 'u': {
+                        // Unicode escape \uXXXX
+                        if (pos + 4 >= json.size()) {
+                            throw RuntimeError("json_parse: invalid unicode escape");
+                        }
+                        std::string hex = json.substr(pos + 1, 4);
+                        unsigned int codepoint = std::stoul(hex, nullptr, 16);
+                        // Simple UTF-8 encoding for BMP characters
+                        if (codepoint < 0x80) {
+                            result += static_cast<char>(codepoint);
+                        } else if (codepoint < 0x800) {
+                            result += static_cast<char>(0xC0 | (codepoint >> 6));
+                            result += static_cast<char>(0x80 | (codepoint & 0x3F));
+                        } else {
+                            result += static_cast<char>(0xE0 | (codepoint >> 12));
+                            result += static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+                            result += static_cast<char>(0x80 | (codepoint & 0x3F));
+                        }
+                        pos += 4;
+                        break;
+                    }
+                    default:
+                        throw RuntimeError("json_parse: invalid escape sequence");
+                }
+            } else {
+                result += json[pos];
+            }
+            pos++;
+        }
+
+        if (pos >= json.size()) {
+            throw RuntimeError("json_parse: unterminated string");
+        }
+        pos++; // Skip closing '"'
+        return makeString(result);
+    }
+
+    static ValuePtr parseNumber(const std::string& json, size_t& pos) {
+        size_t start = pos;
+        bool isFloat = false;
+
+        if (json[pos] == '-') pos++;
+
+        while (pos < json.size() && std::isdigit(json[pos])) pos++;
+
+        if (pos < json.size() && json[pos] == '.') {
+            isFloat = true;
+            pos++;
+            while (pos < json.size() && std::isdigit(json[pos])) pos++;
+        }
+
+        if (pos < json.size() && (json[pos] == 'e' || json[pos] == 'E')) {
+            isFloat = true;
+            pos++;
+            if (pos < json.size() && (json[pos] == '+' || json[pos] == '-')) pos++;
+            while (pos < json.size() && std::isdigit(json[pos])) pos++;
+        }
+
+        std::string numStr = json.substr(start, pos - start);
+        if (isFloat) {
+            return makeFloat(std::stod(numStr));
+        } else {
+            return makeInt(std::stoll(numStr));
+        }
+    }
+
+    static ValuePtr parseBool(const std::string& json, size_t& pos) {
+        if (json.substr(pos, 4) == "true") {
+            pos += 4;
+            return makeBool(true);
+        }
+        if (json.substr(pos, 5) == "false") {
+            pos += 5;
+            return makeBool(false);
+        }
+        throw RuntimeError("json_parse: invalid boolean");
+    }
+
+    static ValuePtr parseNull(const std::string& json, size_t& pos) {
+        if (json.substr(pos, 4) == "null") {
+            pos += 4;
+            return makeUnit();
+        }
+        throw RuntimeError("json_parse: invalid null");
+    }
+};
+
+// JSON Stringify helper
+static std::string jsonStringify(ValuePtr val, int indent = 0, bool pretty = false) {
+    val = force(val);
+
+    auto indentStr = [&](int level) -> std::string {
+        return pretty ? std::string(level * 2, ' ') : "";
+    };
+    auto newline = [&]() -> std::string {
+        return pretty ? "\n" : "";
+    };
+
+    if (val->isUnit()) {
+        return "null";
+    }
+    if (val->isBool()) {
+        return val->asBool() ? "true" : "false";
+    }
+    if (val->isInt()) {
+        return std::to_string(val->asInt());
+    }
+    if (val->isFloat()) {
+        std::ostringstream oss;
+        oss << val->asFloat();
+        return oss.str();
+    }
+    if (val->isString()) {
+        std::string result = "\"";
+        for (char c : val->asString()) {
+            switch (c) {
+                case '"': result += "\\\""; break;
+                case '\\': result += "\\\\"; break;
+                case '\b': result += "\\b"; break;
+                case '\f': result += "\\f"; break;
+                case '\n': result += "\\n"; break;
+                case '\r': result += "\\r"; break;
+                case '\t': result += "\\t"; break;
+                default:
+                    if (static_cast<unsigned char>(c) < 0x20) {
+                        char buf[8];
+                        snprintf(buf, sizeof(buf), "\\u%04x", static_cast<unsigned char>(c));
+                        result += buf;
+                    } else {
+                        result += c;
+                    }
+            }
+        }
+        result += "\"";
+        return result;
+    }
+    if (val->isList()) {
+        const auto& list = val->asList();
+        if (list.empty()) return "[]";
+
+        std::string result = "[" + newline();
+        for (size_t i = 0; i < list.size(); i++) {
+            result += indentStr(indent + 1) + jsonStringify(list[i], indent + 1, pretty);
+            if (i < list.size() - 1) result += ",";
+            result += newline();
+        }
+        result += indentStr(indent) + "]";
+        return result;
+    }
+    if (val->isRecord()) {
+        const auto& record = val->asRecord();
+        if (record.fields.empty()) return "{}";
+
+        std::string result = "{" + newline();
+        size_t i = 0;
+        for (const auto& [key, value] : record.fields) {
+            result += indentStr(indent + 1) + "\"" + key + "\":" + (pretty ? " " : "") + jsonStringify(value, indent + 1, pretty);
+            if (i < record.fields.size() - 1) result += ",";
+            result += newline();
+            i++;
+        }
+        result += indentStr(indent) + "}";
+        return result;
+    }
+    if (val->isTuple()) {
+        // Represent tuples as arrays
+        const auto& tuple = val->asTuple();
+        if (tuple.empty()) return "[]";
+
+        std::string result = "[" + newline();
+        for (size_t i = 0; i < tuple.size(); i++) {
+            result += indentStr(indent + 1) + jsonStringify(tuple[i], indent + 1, pretty);
+            if (i < tuple.size() - 1) result += ",";
+            result += newline();
+        }
+        result += indentStr(indent) + "]";
+        return result;
+    }
+
+    throw RuntimeError("json_stringify: cannot convert value to JSON");
+}
 
 void registerBuiltins(EnvPtr env) {
     // print(value) - Print a value
@@ -774,6 +1117,284 @@ void registerBuiltins(EnvPtr env) {
         }
 
         throw RuntimeError("compare: can only compare numbers or strings");
+    }));
+
+    // ============ HTTP/S Module ============
+
+    // http_get(url) - Simple HTTP GET request, returns response body as string
+    env->define("http_get", makeBuiltin("http_get", 1, [](const std::vector<ValuePtr>& args) {
+        auto urlVal = force(args[0]);
+        if (!urlVal->isString()) throw RuntimeError("http_get: expected string URL");
+
+        std::string url = urlVal->asString();
+        std::string responseBody;
+
+        CURL* curl = curl_easy_init();
+        if (!curl) {
+            throw RuntimeError("http_get: failed to initialize CURL");
+        }
+
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseBody);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Setsuna/1.0");
+
+        CURLcode res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK) {
+            std::string error = curl_easy_strerror(res);
+            curl_easy_cleanup(curl);
+            throw RuntimeError("http_get: " + error);
+        }
+
+        curl_easy_cleanup(curl);
+        return makeString(responseBody);
+    }));
+
+    // http_post(url, body) - Simple HTTP POST request, returns response body
+    env->define("http_post", makeBuiltin("http_post", 2, [](const std::vector<ValuePtr>& args) {
+        auto urlVal = force(args[0]);
+        auto bodyVal = force(args[1]);
+        if (!urlVal->isString()) throw RuntimeError("http_post: expected string URL");
+        if (!bodyVal->isString()) throw RuntimeError("http_post: expected string body");
+
+        std::string url = urlVal->asString();
+        std::string requestBody = bodyVal->asString();
+        std::string responseBody;
+
+        CURL* curl = curl_easy_init();
+        if (!curl) {
+            throw RuntimeError("http_post: failed to initialize CURL");
+        }
+
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestBody.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(requestBody.size()));
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseBody);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, 30L);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Setsuna/1.0");
+
+        CURLcode res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK) {
+            std::string error = curl_easy_strerror(res);
+            curl_easy_cleanup(curl);
+            throw RuntimeError("http_post: " + error);
+        }
+
+        curl_easy_cleanup(curl);
+        return makeString(responseBody);
+    }));
+
+    // http_request(options) - Advanced HTTP request with full control
+    // Options record: { url: string, method?: string, headers?: record, body?: string, timeout?: int }
+    // Returns: { status: int, body: string, headers: record }
+    env->define("http_request", makeBuiltin("http_request", 1, [](const std::vector<ValuePtr>& args) {
+        auto optionsVal = force(args[0]);
+        if (!optionsVal->isRecord()) throw RuntimeError("http_request: expected record options");
+
+        const auto& options = optionsVal->asRecord();
+
+        // Get URL (required)
+        auto urlIt = options.fields.find("url");
+        if (urlIt == options.fields.end()) {
+            throw RuntimeError("http_request: missing required 'url' field");
+        }
+        auto urlVal = force(urlIt->second);
+        if (!urlVal->isString()) {
+            throw RuntimeError("http_request: 'url' must be a string");
+        }
+        std::string url = urlVal->asString();
+
+        // Get method (default: GET)
+        std::string method = "GET";
+        auto methodIt = options.fields.find("method");
+        if (methodIt != options.fields.end()) {
+            auto methodVal = force(methodIt->second);
+            if (!methodVal->isString()) {
+                throw RuntimeError("http_request: 'method' must be a string");
+            }
+            method = methodVal->asString();
+            // Convert to uppercase
+            std::transform(method.begin(), method.end(), method.begin(), ::toupper);
+        }
+
+        // Get body (optional)
+        std::string requestBody;
+        auto bodyIt = options.fields.find("body");
+        if (bodyIt != options.fields.end()) {
+            auto bodyVal = force(bodyIt->second);
+            if (!bodyVal->isString()) {
+                throw RuntimeError("http_request: 'body' must be a string");
+            }
+            requestBody = bodyVal->asString();
+        }
+
+        // Get timeout (default: 30)
+        long timeout = 30;
+        auto timeoutIt = options.fields.find("timeout");
+        if (timeoutIt != options.fields.end()) {
+            auto timeoutVal = force(timeoutIt->second);
+            if (!timeoutVal->isInt()) {
+                throw RuntimeError("http_request: 'timeout' must be an integer");
+            }
+            timeout = static_cast<long>(timeoutVal->asInt());
+        }
+
+        // Initialize CURL
+        CURL* curl = curl_easy_init();
+        if (!curl) {
+            throw RuntimeError("http_request: failed to initialize CURL");
+        }
+
+        std::string responseBody;
+        std::vector<std::pair<std::string, std::string>> responseHeaders;
+
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlWriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseBody);
+        curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCallback);
+        curl_easy_setopt(curl, CURLOPT_HEADERDATA, &responseHeaders);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, "Setsuna/1.0");
+
+        // Set custom request method
+        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method.c_str());
+
+        // Set request body for methods that support it
+        if (!requestBody.empty()) {
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestBody.c_str());
+            curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(requestBody.size()));
+        }
+
+        // Set custom headers
+        struct curl_slist* headerList = nullptr;
+        auto headersIt = options.fields.find("headers");
+        if (headersIt != options.fields.end()) {
+            auto headersVal = force(headersIt->second);
+            if (!headersVal->isRecord()) {
+                throw RuntimeError("http_request: 'headers' must be a record");
+            }
+            for (const auto& [key, value] : headersVal->asRecord().fields) {
+                auto valForced = force(value);
+                if (!valForced->isString()) {
+                    throw RuntimeError("http_request: header values must be strings");
+                }
+                std::string headerLine = key + ": " + valForced->asString();
+                headerList = curl_slist_append(headerList, headerLine.c_str());
+            }
+            curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
+        }
+
+        // Perform request
+        CURLcode res = curl_easy_perform(curl);
+
+        // Get status code
+        long statusCode = 0;
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &statusCode);
+
+        // Clean up header list
+        if (headerList) {
+            curl_slist_free_all(headerList);
+        }
+
+        if (res != CURLE_OK) {
+            std::string error = curl_easy_strerror(res);
+            curl_easy_cleanup(curl);
+            throw RuntimeError("http_request: " + error);
+        }
+
+        curl_easy_cleanup(curl);
+
+        // Build response headers record
+        RecordValue headersRecord;
+        for (const auto& [key, value] : responseHeaders) {
+            headersRecord.fields[key] = makeString(value);
+        }
+
+        // Build response record
+        RecordValue response;
+        response.fields["status"] = makeInt(statusCode);
+        response.fields["body"] = makeString(responseBody);
+        response.fields["headers"] = makeRecord(headersRecord);
+
+        return makeRecord(response);
+    }));
+
+    // url_encode(str) - URL encode a string
+    env->define("url_encode", makeBuiltin("url_encode", 1, [](const std::vector<ValuePtr>& args) {
+        auto strVal = force(args[0]);
+        if (!strVal->isString()) throw RuntimeError("url_encode: expected string");
+
+        CURL* curl = curl_easy_init();
+        if (!curl) {
+            throw RuntimeError("url_encode: failed to initialize CURL");
+        }
+
+        char* encoded = curl_easy_escape(curl, strVal->asString().c_str(),
+                                          static_cast<int>(strVal->asString().size()));
+        if (!encoded) {
+            curl_easy_cleanup(curl);
+            throw RuntimeError("url_encode: encoding failed");
+        }
+
+        std::string result(encoded);
+        curl_free(encoded);
+        curl_easy_cleanup(curl);
+
+        return makeString(result);
+    }));
+
+    // url_decode(str) - URL decode a string
+    env->define("url_decode", makeBuiltin("url_decode", 1, [](const std::vector<ValuePtr>& args) {
+        auto strVal = force(args[0]);
+        if (!strVal->isString()) throw RuntimeError("url_decode: expected string");
+
+        CURL* curl = curl_easy_init();
+        if (!curl) {
+            throw RuntimeError("url_decode: failed to initialize CURL");
+        }
+
+        int decodedLen = 0;
+        char* decoded = curl_easy_unescape(curl, strVal->asString().c_str(),
+                                            static_cast<int>(strVal->asString().size()), &decodedLen);
+        if (!decoded) {
+            curl_easy_cleanup(curl);
+            throw RuntimeError("url_decode: decoding failed");
+        }
+
+        std::string result(decoded, decodedLen);
+        curl_free(decoded);
+        curl_easy_cleanup(curl);
+
+        return makeString(result);
+    }));
+
+    // ============ JSON Operations ============
+
+    // json_parse(str) - Parse JSON string to Setsuna values
+    env->define("json_parse", makeBuiltin("json_parse", 1, [](const std::vector<ValuePtr>& args) {
+        auto strVal = force(args[0]);
+        if (!strVal->isString()) throw RuntimeError("json_parse: expected string");
+
+        return JsonParser::parse(strVal->asString());
+    }));
+
+    // json_stringify(value) - Convert Setsuna value to JSON string
+    env->define("json_stringify", makeBuiltin("json_stringify", 1, [](const std::vector<ValuePtr>& args) {
+        auto val = force(args[0]);
+        return makeString(jsonStringify(val));
+    }));
+
+    // json_pretty(value) - Convert Setsuna value to formatted JSON string
+    env->define("json_pretty", makeBuiltin("json_pretty", 1, [](const std::vector<ValuePtr>& args) {
+        auto val = force(args[0]);
+        return makeString(jsonStringify(val, 0, true));
     }));
 }
 
