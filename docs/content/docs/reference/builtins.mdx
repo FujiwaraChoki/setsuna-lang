@@ -16,8 +16,9 @@ Setsuna provides a set of built-in functions for common operations. These are av
 | **HTTP** | `http_get`, `http_post`, `http_request`, `url_encode`, `url_decode` |
 | **JSON** | `json_parse`, `json_stringify`, `json_pretty` |
 | **Type Conversion** | `str`, `int`, `float` |
-| **Type Checking** | `is_int`, `is_float`, `is_string`, `is_bool`, `is_list`, `is_tuple`, `is_record`, `is_fn` |
+| **Type Checking** | `is_int`, `is_float`, `is_string`, `is_bool`, `is_list`, `is_tuple`, `is_record`, `is_fn`, `is_map` |
 | **List Operations** | `head`, `tail`, `cons`, `len`, `empty`, `reverse`, `append`, `concat`, `nth`, `range`, `sort` |
+| **Map Operations** | `map_new`, `map_get`, `map_get_or`, `map_set`, `map_has`, `map_remove`, `map_keys`, `map_values`, `map_entries`, `map_size`, `map_empty`, `map_from_list`, `map_merge` |
 | **Math** | `abs`, `sqrt`, `pow`, `min`, `max`, `floor`, `ceil`, `round` |
 | **Extended Math** | `sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `atan2`, `log`, `log10`, `exp`, `random`, `random_int`, `pi`, `e` |
 | **Strings** | `substr`, `split`, `join`, `uppercase`, `lowercase`, `trim`, `trim_start`, `trim_end`, `contains`, `starts_with`, `ends_with`, `replace`, `replace_all`, `char_at`, `chars`, `index_of` |
@@ -195,6 +196,22 @@ is_fn(42)            // false
 ```
 
 **Signature:** `is_fn(value) -> Bool`
+
+### is_map
+
+Check if a value is a map (hash map).
+
+```typescript
+is_map(%{ "a": 1 })  // true
+is_map({ x: 1 })     // false (this is a record)
+is_map([1, 2, 3])    // false
+```
+
+**Signature:** `is_map(value) -> Bool`
+
+<Note>
+Maps (`%{ }`) are different from records (`{ }`). See [Map Functions](/reference/maps) for details.
+</Note>
 
 ## List Operations
 
@@ -489,6 +506,7 @@ compare("b", "a")    // 1
 
 <Cards>
   <Card title="List Operations" href="/reference/list-ops" />
+  <Card title="Map Functions" href="/reference/maps" />
   <Card title="Math Functions" href="/reference/math" />
   <Card title="String Functions" href="/reference/strings" />
   <Card title="I/O Functions" href="/reference/io" />

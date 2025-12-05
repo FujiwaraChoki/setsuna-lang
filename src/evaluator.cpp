@@ -1,8 +1,54 @@
 #include "evaluator.hpp"
 #include "error.hpp"
+#include "lexer.hpp"
+#include "parser.hpp"
 #include <cmath>
+#include <fstream>
+#include <sstream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 namespace setsuna {
+
+// MapValue implementation
+ValuePtr* MapValue::find(const ValuePtr& key) {
+    for (auto& [k, v] : entries) {
+        if (k->equals(*key)) {
+            return &v;
+        }
+    }
+    return nullptr;
+}
+
+const ValuePtr* MapValue::find(const ValuePtr& key) const {
+    for (const auto& [k, v] : entries) {
+        if (k->equals(*key)) {
+            return &v;
+        }
+    }
+    return nullptr;
+}
+
+void MapValue::set(const ValuePtr& key, const ValuePtr& value) {
+    for (auto& [k, v] : entries) {
+        if (k->equals(*key)) {
+            v = value;
+            return;
+        }
+    }
+    entries.push_back({key, value});
+}
+
+bool MapValue::remove(const ValuePtr& key) {
+    for (auto it = entries.begin(); it != entries.end(); ++it) {
+        if (it->first->equals(*key)) {
+            entries.erase(it);
+            return true;
+        }
+    }
+    return false;
+}
 
 // Value implementation
 std::string Value::toString() const {
@@ -48,6 +94,17 @@ std::string Value::toString() const {
                 if (!first) s += ", ";
                 first = false;
                 s += k + ": " + v->toString();
+            }
+            return s + " }";
+        }
+        case ValueType::MAP: {
+            std::string s = "%{ ";
+            const auto& m = asMap();
+            bool first = true;
+            for (const auto& [k, v] : m.entries) {
+                if (!first) s += ", ";
+                first = false;
+                s += k->toString() + ": " + v->toString();
             }
             return s + " }";
         }
@@ -116,6 +173,16 @@ bool Value::equals(const Value& other) const {
             }
             return true;
         }
+        case ValueType::MAP: {
+            const auto& a = asMap().entries;
+            const auto& b = other.asMap().entries;
+            if (a.size() != b.size()) return false;
+            for (const auto& [k, v] : a) {
+                const ValuePtr* bv = other.asMap().find(k);
+                if (!bv || !v->equals(**bv)) return false;
+            }
+            return true;
+        }
         case ValueType::ADT: {
             const auto& a = asADT();
             const auto& b = other.asADT();
@@ -150,6 +217,129 @@ ValuePtr Thunk::force() const {
 // Evaluator implementation
 Evaluator::Evaluator(EnvPtr env) : env_(env) {}
 
+void Evaluator::setBasePath(const std::string& path) {
+    basePath_ = path;
+}
+
+void Evaluator::addSearchPath(const std::string& path) {
+    searchPaths_.push_back(path);
+}
+
+std::string Evaluator::resolveModulePath(const std::string& moduleName) const {
+    // Convert module name to file path (e.g., "Math" -> "Math.stsn")
+    std::string filename = moduleName + ".stsn";
+
+    // Try base path first
+    if (!basePath_.empty()) {
+        fs::path fullPath = fs::path(basePath_) / filename;
+        if (fs::exists(fullPath)) {
+            return fullPath.string();
+        }
+    }
+
+    // Try search paths
+    for (const auto& searchPath : searchPaths_) {
+        fs::path fullPath = fs::path(searchPath) / filename;
+        if (fs::exists(fullPath)) {
+            return fullPath.string();
+        }
+    }
+
+    // Try current directory
+    if (fs::exists(filename)) {
+        return filename;
+    }
+
+    // Try stdlib path
+    std::vector<std::string> defaultPaths = {
+        "stdlib",
+        "../stdlib",
+        "/usr/local/share/setsuna/stdlib",
+        "/usr/share/setsuna/stdlib"
+    };
+    for (const auto& dp : defaultPaths) {
+        fs::path fullPath = fs::path(dp) / filename;
+        if (fs::exists(fullPath)) {
+            return fullPath.string();
+        }
+    }
+
+    return "";
+}
+
+EnvPtr Evaluator::loadModule(const std::string& moduleName, const SourceLocation& loc) {
+    // Check cache first
+    auto it = moduleCache_.find(moduleName);
+    if (it != moduleCache_.end()) {
+        return it->second;
+    }
+
+    // Check for cyclic imports
+    if (loadingModules_.count(moduleName)) {
+        throw RuntimeError("Cyclic import detected: " + moduleName, loc);
+    }
+
+    // Resolve the module path
+    std::string modulePath = resolveModulePath(moduleName);
+    if (modulePath.empty()) {
+        throw RuntimeError("Cannot find module: " + moduleName, loc);
+    }
+
+    // Mark as loading
+    loadingModules_.insert(moduleName);
+
+    // Read the file
+    std::ifstream file(modulePath);
+    if (!file) {
+        loadingModules_.erase(moduleName);
+        throw RuntimeError("Cannot read module file: " + modulePath, loc);
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string source = buffer.str();
+
+    // Parse the file
+    Lexer lexer(source, modulePath);
+    auto tokens = lexer.tokenize();
+    Parser parser(tokens);
+    auto program = parser.parse();
+
+    // Create a new environment for the module
+    auto moduleEnv = env_->extend();
+
+    // Save current state and evaluate module
+    auto oldBasePath = basePath_;
+    basePath_ = fs::path(modulePath).parent_path().string();
+
+    auto oldEnv = env_;
+    env_ = moduleEnv;
+
+    try {
+        for (const auto& decl : program.declarations) {
+            if (decl.is<ExprPtr>()) {
+                eval(decl.as<ExprPtr>());
+            } else {
+                evalDecl(decl);
+            }
+        }
+    } catch (...) {
+        // Restore state on error
+        basePath_ = oldBasePath;
+        env_ = oldEnv;
+        loadingModules_.erase(moduleName);
+        throw;
+    }
+
+    // Restore state
+    basePath_ = oldBasePath;
+    env_ = oldEnv;
+    loadingModules_.erase(moduleName);
+
+    // Cache and return
+    moduleCache_[moduleName] = moduleEnv;
+    return moduleEnv;
+}
+
 ValuePtr Evaluator::eval(const Program& program) {
     ValuePtr result = makeUnit();
     for (const auto& decl : program.declarations) {
@@ -176,6 +366,8 @@ ValuePtr Evaluator::eval(const ExprPtr& expr, EnvPtr env) {
             return evalFloatLiteral(e);
         } else if constexpr (std::is_same_v<T, StringLiteral>) {
             return evalStringLiteral(e);
+        } else if constexpr (std::is_same_v<T, InterpolatedStringExpr>) {
+            return evalInterpolatedString(e, env);
         } else if constexpr (std::is_same_v<T, BoolLiteral>) {
             return evalBoolLiteral(e);
         } else if constexpr (std::is_same_v<T, Identifier>) {
@@ -196,12 +388,18 @@ ValuePtr Evaluator::eval(const ExprPtr& expr, EnvPtr env) {
             return evalCall(e, env);
         } else if constexpr (std::is_same_v<T, IfExpr>) {
             return evalIfExpr(e, env);
+        } else if constexpr (std::is_same_v<T, WhileExpr>) {
+            return evalWhileExpr(e, env);
+        } else if constexpr (std::is_same_v<T, ForExpr>) {
+            return evalForExpr(e, env);
         } else if constexpr (std::is_same_v<T, ListExpr>) {
             return evalListExpr(e, env);
         } else if constexpr (std::is_same_v<T, TupleExpr>) {
             return evalTupleExpr(e, env);
         } else if constexpr (std::is_same_v<T, RecordExpr>) {
             return evalRecordExpr(e, env);
+        } else if constexpr (std::is_same_v<T, MapExpr>) {
+            return evalMapExpr(e, env);
         } else if constexpr (std::is_same_v<T, FieldAccess>) {
             return evalFieldAccess(e, env);
         } else if constexpr (std::is_same_v<T, MatchExpr>) {
@@ -250,6 +448,26 @@ ValuePtr Evaluator::evalFloatLiteral(const FloatLiteral& lit) {
 
 ValuePtr Evaluator::evalStringLiteral(const StringLiteral& lit) {
     return makeString(lit.value);
+}
+
+ValuePtr Evaluator::evalInterpolatedString(const InterpolatedStringExpr& fstr, EnvPtr env) {
+    std::string result;
+    for (const auto& part : fstr.parts) {
+        if (part.isExpr) {
+            ValuePtr val = force(eval(part.expr, env));
+            // Convert value to string for interpolation
+            if (val->isString()) {
+                result += val->asString();
+            } else {
+                // Use toString for non-string values but remove quotes for strings
+                std::string s = val->toString();
+                result += s;
+            }
+        } else {
+            result += part.text;
+        }
+    }
+    return makeString(result);
 }
 
 ValuePtr Evaluator::evalBoolLiteral(const BoolLiteral& lit) {
@@ -416,6 +634,39 @@ ValuePtr Evaluator::evalIfExpr(const IfExpr& ifExpr, EnvPtr env) {
     return makeUnit();
 }
 
+ValuePtr Evaluator::evalWhileExpr(const WhileExpr& whileExpr, EnvPtr env) {
+    ValuePtr result = makeUnit();
+
+    while (true) {
+        auto cond = force(eval(whileExpr.condition, env));
+        if (!cond->asBool()) break;
+
+        auto loopEnv = env->extend();
+        result = eval(whileExpr.body, loopEnv);
+    }
+
+    return result;
+}
+
+ValuePtr Evaluator::evalForExpr(const ForExpr& forExpr, EnvPtr env) {
+    auto iterable = force(eval(forExpr.iterable, env));
+
+    if (!iterable->isList()) {
+        throw RuntimeError("for: expected list to iterate over", forExpr.loc);
+    }
+
+    ValuePtr result = makeUnit();
+    const auto& list = iterable->asList();
+
+    for (const auto& item : list) {
+        auto loopEnv = env->extend();
+        loopEnv->define(forExpr.varName, force(item));
+        result = eval(forExpr.body, loopEnv);
+    }
+
+    return result;
+}
+
 ValuePtr Evaluator::evalListExpr(const ListExpr& list, EnvPtr env) {
     std::vector<ValuePtr> elements;
     for (const auto& elem : list.elements) {
@@ -438,6 +689,16 @@ ValuePtr Evaluator::evalRecordExpr(const RecordExpr& record, EnvPtr env) {
         rec.fields[name] = eval(expr, env);
     }
     return makeRecord(rec);
+}
+
+ValuePtr Evaluator::evalMapExpr(const MapExpr& map, EnvPtr env) {
+    MapValue m;
+    for (const auto& [keyExpr, valueExpr] : map.entries) {
+        ValuePtr key = eval(keyExpr, env);
+        ValuePtr value = eval(valueExpr, env);
+        m.set(key, value);
+    }
+    return makeMap(std::move(m));
 }
 
 ValuePtr Evaluator::evalFieldAccess(const FieldAccess& access, EnvPtr env) {
@@ -653,9 +914,12 @@ void Evaluator::evalModuleDef(const ModuleDef& mod) {
 }
 
 void Evaluator::evalImportDecl(const ImportDecl& imp) {
-    // For now, just register that we want this module
-    // Full implementation would load from file
-    (void)imp;
+    // Load the module from file
+    EnvPtr moduleEnv = loadModule(imp.moduleName, imp.loc);
+
+    // Use alias if provided, otherwise use the module name
+    std::string name = imp.alias.value_or(imp.moduleName);
+    env_->defineModule(name, moduleEnv);
 }
 
 } // namespace setsuna

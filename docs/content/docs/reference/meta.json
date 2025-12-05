@@ -4,6 +4,7 @@
     "---Built-in Functions---",
     "builtins",
     "list-ops",
+    "maps",
     "math",
     "strings",
     "io",

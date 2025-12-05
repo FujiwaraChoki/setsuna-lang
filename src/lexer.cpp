@@ -11,6 +11,10 @@ static const std::unordered_map<std::string, TokenType> keywords = {
     {"if", TokenType::IF},
     {"else", TokenType::ELSE},
     {"match", TokenType::MATCH},
+    {"while", TokenType::WHILE},
+    {"for", TokenType::FOR},
+    {"in", TokenType::IN},
+    {"as", TokenType::AS},
     {"type", TokenType::TYPE},
     {"module", TokenType::MODULE},
     {"import", TokenType::IMPORT},
@@ -23,6 +27,7 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::INT: return "INT";
         case TokenType::FLOAT: return "FLOAT";
         case TokenType::STRING: return "STRING";
+        case TokenType::FSTRING: return "FSTRING";
         case TokenType::IDENT: return "IDENT";
         case TokenType::LET: return "LET";
         case TokenType::CONST: return "CONST";
@@ -30,6 +35,10 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::IF: return "IF";
         case TokenType::ELSE: return "ELSE";
         case TokenType::MATCH: return "MATCH";
+        case TokenType::WHILE: return "WHILE";
+        case TokenType::FOR: return "FOR";
+        case TokenType::IN: return "IN";
+        case TokenType::AS: return "AS";
         case TokenType::TYPE: return "TYPE";
         case TokenType::MODULE: return "MODULE";
         case TokenType::IMPORT: return "IMPORT";
@@ -58,8 +67,10 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::RBRACE: return "RBRACE";
         case TokenType::LBRACKET: return "LBRACKET";
         case TokenType::RBRACKET: return "RBRACKET";
+        case TokenType::MAP_START: return "MAP_START";
         case TokenType::COMMA: return "COMMA";
         case TokenType::COLON: return "COLON";
+        case TokenType::DOUBLE_COLON: return "DOUBLE_COLON";
         case TokenType::SEMICOLON: return "SEMICOLON";
         case TokenType::DOT: return "DOT";
         case TokenType::DOTDOTDOT: return "DOTDOTDOT";
@@ -183,6 +194,39 @@ Token Lexer::readString() {
     return Token(TokenType::STRING, str, loc);
 }
 
+Token Lexer::readFString() {
+    SourceLocation loc = currentLocation();
+    advance(); // skip 'f'
+    advance(); // skip opening quote
+
+    std::string str;
+    while (current() != '"' && current() != '\0') {
+        if (current() == '\\') {
+            advance();
+            switch (current()) {
+                case 'n': str += '\n'; break;
+                case 't': str += '\t'; break;
+                case 'r': str += '\r'; break;
+                case '\\': str += '\\'; break;
+                case '"': str += '"'; break;
+                case '{': str += '{'; break;
+                case '}': str += '}'; break;
+                default: str += current();
+            }
+        } else {
+            str += current();
+        }
+        advance();
+    }
+
+    if (current() == '\0') {
+        throw LexerError("Unterminated f-string literal", loc);
+    }
+    advance(); // skip closing quote
+
+    return Token(TokenType::FSTRING, str, loc);
+}
+
 Token Lexer::readIdentOrKeyword() {
     SourceLocation loc = currentLocation();
     std::string ident;
@@ -226,6 +270,11 @@ Token Lexer::nextToken() {
         return readString();
     }
 
+    // F-strings (interpolated strings)
+    if (current() == 'f' && peek() == '"') {
+        return readFString();
+    }
+
     // Identifiers and keywords
     if (std::isalpha(current()) || current() == '_') {
         return readIdentOrKeyword();
@@ -263,6 +312,14 @@ Token Lexer::nextToken() {
     if (current() == '.' && peek() == '.' && peek(2) == '.') {
         advance(); advance(); advance();
         return Token(TokenType::DOTDOTDOT, loc);
+    }
+    if (current() == '%' && peek() == '{') {
+        advance(); advance();
+        return Token(TokenType::MAP_START, loc);
+    }
+    if (current() == ':' && peek() == ':') {
+        advance(); advance();
+        return Token(TokenType::DOUBLE_COLON, loc);
     }
 
     // Single-character tokens

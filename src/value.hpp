@@ -56,6 +56,22 @@ struct RecordValue {
     std::unordered_map<std::string, ValuePtr> fields;
 };
 
+// Map value (hash map with arbitrary key types)
+struct MapValue {
+    // Using a vector of pairs since ValuePtr needs custom hash
+    std::vector<std::pair<ValuePtr, ValuePtr>> entries;
+
+    // Find value by key
+    ValuePtr* find(const ValuePtr& key);
+    const ValuePtr* find(const ValuePtr& key) const;
+
+    // Insert or update
+    void set(const ValuePtr& key, const ValuePtr& value);
+
+    // Remove by key
+    bool remove(const ValuePtr& key);
+};
+
 // Wrapper types for List and Tuple to make them distinct in variant
 struct ListValue {
     std::vector<ValuePtr> elements;
@@ -74,6 +90,7 @@ using ValueVariant = std::variant<
     ListValue,                    // List
     TupleValue,                   // Tuple
     RecordValue,                  // Record
+    MapValue,                     // Map (hash map)
     Closure,                      // Function closure
     Builtin,                      // Built-in function
     ADTValue,                     // Algebraic data type value
@@ -89,6 +106,7 @@ enum class ValueType {
     LIST,
     TUPLE,
     RECORD,
+    MAP,
     CLOSURE,
     BUILTIN,
     ADT,
@@ -108,6 +126,7 @@ struct Value {
     Value(ListValue v) : data(std::move(v)), type(ValueType::LIST) {}
     Value(TupleValue v) : data(std::move(v)), type(ValueType::TUPLE) {}
     Value(RecordValue v) : data(std::move(v)), type(ValueType::RECORD) {}
+    Value(MapValue v) : data(std::move(v)), type(ValueType::MAP) {}
     Value(Closure v) : data(std::move(v)), type(ValueType::CLOSURE) {}
     Value(Builtin v) : data(std::move(v)), type(ValueType::BUILTIN) {}
     Value(ADTValue v) : data(std::move(v)), type(ValueType::ADT) {}
@@ -123,6 +142,8 @@ struct Value {
     const std::vector<ValuePtr>& asTuple() const { return std::get<TupleValue>(data).elements; }
     std::vector<ValuePtr>& asTuple() { return std::get<TupleValue>(data).elements; }
     const RecordValue& asRecord() const { return std::get<RecordValue>(data); }
+    const MapValue& asMap() const { return std::get<MapValue>(data); }
+    MapValue& asMap() { return std::get<MapValue>(data); }
     const Closure& asClosure() const { return std::get<Closure>(data); }
     const Builtin& asBuiltin() const { return std::get<Builtin>(data); }
     const ADTValue& asADT() const { return std::get<ADTValue>(data); }
@@ -137,6 +158,7 @@ struct Value {
     bool isList() const { return type == ValueType::LIST; }
     bool isTuple() const { return type == ValueType::TUPLE; }
     bool isRecord() const { return type == ValueType::RECORD; }
+    bool isMap() const { return type == ValueType::MAP; }
     bool isClosure() const { return type == ValueType::CLOSURE; }
     bool isBuiltin() const { return type == ValueType::BUILTIN; }
     bool isADT() const { return type == ValueType::ADT; }
@@ -188,6 +210,16 @@ inline ValuePtr makeTuple(std::vector<ValuePtr> v) {
 
 inline ValuePtr makeRecord(RecordValue v) {
     return std::make_shared<Value>(std::move(v));
+}
+
+inline ValuePtr makeMap(MapValue v) {
+    return std::make_shared<Value>(std::move(v));
+}
+
+inline ValuePtr makeMap(std::vector<std::pair<ValuePtr, ValuePtr>> entries) {
+    MapValue m;
+    m.entries = std::move(entries);
+    return std::make_shared<Value>(std::move(m));
 }
 
 inline ValuePtr makeClosure(Closure c) {

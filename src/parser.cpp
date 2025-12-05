@@ -162,7 +162,11 @@ ImportDecl Parser::parseImportDecl() {
     std::string name = nameTok.asString();
 
     std::optional<std::string> alias;
-    // Could add 'as' keyword support here
+    // Support 'import Module as Alias'
+    if (match(TokenType::AS)) {
+        Token aliasTok = expect(TokenType::IDENT, "Expected alias name after 'as'");
+        alias = aliasTok.asString();
+    }
 
     match(TokenType::SEMICOLON);
 
@@ -177,6 +181,8 @@ ExprPtr Parser::parseExpr() {
     if (check(TokenType::LET) || check(TokenType::CONST)) return parseLetExpr();
     if (check(TokenType::FN)) return parseFnDef();
     if (check(TokenType::IF)) return parseIfExpr();
+    if (check(TokenType::WHILE)) return parseWhileExpr();
+    if (check(TokenType::FOR)) return parseForExpr();
     if (check(TokenType::MATCH)) return parseMatchExpr();
 
     // Check for block vs record - record has { ident: ... }
@@ -264,6 +270,31 @@ ExprPtr Parser::parseIfExpr() {
     return makeExpr(IfExpr{condition, thenBranch, elseBranch, loc});
 }
 
+ExprPtr Parser::parseWhileExpr() {
+    SourceLocation loc = current().location;
+    expect(TokenType::WHILE, "Expected 'while'");
+
+    ExprPtr condition = parseExpr();
+    ExprPtr body = parseBlock();
+
+    return makeExpr(WhileExpr{condition, body, loc});
+}
+
+ExprPtr Parser::parseForExpr() {
+    SourceLocation loc = current().location;
+    expect(TokenType::FOR, "Expected 'for'");
+
+    Token varTok = expect(TokenType::IDENT, "Expected loop variable name");
+    std::string varName = varTok.asString();
+
+    expect(TokenType::IN, "Expected 'in'");
+
+    ExprPtr iterable = parseExpr();
+    ExprPtr body = parseBlock();
+
+    return makeExpr(ForExpr{varName, iterable, body, loc});
+}
+
 ExprPtr Parser::parseMatchExpr() {
     SourceLocation loc = current().location;
     expect(TokenType::MATCH, "Expected 'match'");
@@ -311,6 +342,83 @@ ExprPtr Parser::parseBlock() {
     expect(TokenType::RBRACE, "Expected '}'");
 
     return makeExpr(Block{exprs, loc});
+}
+
+ExprPtr Parser::parseMapExpr() {
+    SourceLocation loc = current().location;
+    expect(TokenType::MAP_START, "Expected '%{'");
+    skipNewlines();
+
+    std::vector<std::pair<ExprPtr, ExprPtr>> entries;
+
+    if (!check(TokenType::RBRACE)) {
+        do {
+            skipNewlines();
+            ExprPtr key = parseExpr();
+            expect(TokenType::COLON, "Expected ':'");
+            ExprPtr value = parseExpr();
+            entries.push_back({key, value});
+        } while (match(TokenType::COMMA));
+    }
+
+    skipNewlines();
+    expect(TokenType::RBRACE, "Expected '}'");
+
+    return makeExpr(MapExpr{entries, loc});
+}
+
+ExprPtr Parser::parseFString() {
+    SourceLocation loc = current().location;
+    std::string content = current().asString();
+    advance();
+
+    std::vector<InterpolatedStringPart> parts;
+    std::string currentText;
+    size_t i = 0;
+
+    while (i < content.size()) {
+        if (content[i] == '{') {
+            // Save any accumulated text
+            if (!currentText.empty()) {
+                parts.push_back({false, currentText, nullptr});
+                currentText.clear();
+            }
+
+            // Find matching closing brace
+            int braceCount = 1;
+            size_t start = i + 1;
+            size_t j = start;
+            while (j < content.size() && braceCount > 0) {
+                if (content[j] == '{') braceCount++;
+                else if (content[j] == '}') braceCount--;
+                if (braceCount > 0) j++;
+            }
+
+            if (braceCount != 0) {
+                throw ParseError("Unmatched '{' in f-string", loc);
+            }
+
+            // Parse the expression inside braces
+            std::string exprStr = content.substr(start, j - start);
+            Lexer exprLexer(exprStr, loc.filename);
+            std::vector<Token> exprTokens = exprLexer.tokenize();
+            Parser exprParser(exprTokens);
+            ExprPtr expr = exprParser.parseExpr();
+
+            parts.push_back({true, "", expr});
+            i = j + 1;
+        } else {
+            currentText += content[i];
+            i++;
+        }
+    }
+
+    // Add any remaining text
+    if (!currentText.empty()) {
+        parts.push_back({false, currentText, nullptr});
+    }
+
+    return makeExpr(InterpolatedStringExpr{parts, loc});
 }
 
 // ============ Binary Operators (Precedence Climbing) ============
@@ -457,6 +565,9 @@ ExprPtr Parser::parsePrimary() {
         advance();
         return makeExpr(StringLiteral{val, loc});
     }
+    if (check(TokenType::FSTRING)) {
+        return parseFString();
+    }
     if (check(TokenType::TRUE)) {
         advance();
         return makeExpr(BoolLiteral{true, loc});
@@ -466,11 +577,18 @@ ExprPtr Parser::parsePrimary() {
         return makeExpr(BoolLiteral{false, loc});
     }
 
-    // Identifier or assignment (field access and module access handled in parseCall)
+    // Identifier, module access, or assignment
     if (check(TokenType::IDENT)) {
         std::string name = current().asString();
         SourceLocation identLoc = current().location;
         advance();
+
+        // Check for module access: ModuleName::member
+        if (check(TokenType::DOUBLE_COLON)) {
+            advance();
+            Token member = expect(TokenType::IDENT, "Expected member name after '::'");
+            return makeExpr(ModuleAccess{name, member.asString(), identLoc});
+        }
 
         // Check for assignment: x = value
         if (check(TokenType::ASSIGN)) {
@@ -562,6 +680,11 @@ ExprPtr Parser::parsePrimary() {
 
         expect(TokenType::RBRACKET, "Expected ']'");
         return makeExpr(ListExpr{elements, loc});
+    }
+
+    // Map
+    if (check(TokenType::MAP_START)) {
+        return parseMapExpr();
     }
 
     // Record

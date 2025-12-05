@@ -37,8 +37,12 @@ private:
     ExprPtr parseLetExpr();
     ExprPtr parseFnDef();
     ExprPtr parseIfExpr();
+    ExprPtr parseWhileExpr();
+    ExprPtr parseForExpr();
     ExprPtr parseMatchExpr();
     ExprPtr parseBlock();
+    ExprPtr parseMapExpr();
+    ExprPtr parseFString();
 
     // Binary expression with precedence
     ExprPtr parseOr();

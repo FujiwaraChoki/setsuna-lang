@@ -47,6 +47,8 @@ std::string Type::toString() const {
                 s += k + ": " + v->toString();
             }
             return s + " }";
+        } else if constexpr (std::is_same_v<T, MapTypeT>) {
+            return "Map<" + t.keyType->toString() + ", " + t.valueType->toString() + ">";
         } else if constexpr (std::is_same_v<T, ADTType>) {
             std::string s = t.name;
             if (!t.typeArgs.empty()) {
@@ -158,6 +160,14 @@ TypePtr TypeChecker::inferExpr(const ExprPtr& expr, TypeEnv& env) {
         } else if constexpr (std::is_same_v<T, FloatLiteral>) {
             return makeFloatType();
         } else if constexpr (std::is_same_v<T, StringLiteral>) {
+            return makeStringType();
+        } else if constexpr (std::is_same_v<T, InterpolatedStringExpr>) {
+            // Type-check all expressions inside the f-string
+            for (const auto& part : e.parts) {
+                if (part.isExpr) {
+                    inferExpr(part.expr, env);
+                }
+            }
             return makeStringType();
         } else if constexpr (std::is_same_v<T, BoolLiteral>) {
             return makeBoolType();
@@ -283,6 +293,26 @@ TypePtr TypeChecker::inferExpr(const ExprPtr& expr, TypeEnv& env) {
             }
 
             return thenType;
+        } else if constexpr (std::is_same_v<T, WhileExpr>) {
+            auto condType = inferExpr(e.condition, env);
+            unify(condType, makeBoolType());
+
+            // Body can have any type, but loop returns the body type or unit
+            auto bodyType = inferExpr(e.body, env);
+            return bodyType;
+        } else if constexpr (std::is_same_v<T, ForExpr>) {
+            auto iterableType = inferExpr(e.iterable, env);
+
+            // Get element type from list type
+            auto elemType = freshTypeVar();
+            unify(iterableType, makeListType(elemType));
+
+            // Create new environment with loop variable
+            auto loopEnv = env.extend();
+            loopEnv.define(e.varName, elemType);
+
+            auto bodyType = inferExpr(e.body, loopEnv);
+            return bodyType;
         } else if constexpr (std::is_same_v<T, ListExpr>) {
             if (e.elements.empty()) {
                 return makeListType(freshTypeVar());
@@ -306,6 +336,20 @@ TypePtr TypeChecker::inferExpr(const ExprPtr& expr, TypeEnv& env) {
                 fieldTypes[name] = inferExpr(expr, env);
             }
             return makeRecordType(fieldTypes);
+        } else if constexpr (std::is_same_v<T, MapExpr>) {
+            if (e.entries.empty()) {
+                return makeMapType(freshTypeVar(), freshTypeVar());
+            }
+
+            auto keyType = inferExpr(e.entries[0].first, env);
+            auto valueType = inferExpr(e.entries[0].second, env);
+
+            for (size_t i = 1; i < e.entries.size(); i++) {
+                unify(keyType, inferExpr(e.entries[i].first, env));
+                unify(valueType, inferExpr(e.entries[i].second, env));
+            }
+
+            return makeMapType(keyType, valueType);
         } else if constexpr (std::is_same_v<T, FieldAccess>) {
             auto objType = find(inferExpr(e.object, env));
 

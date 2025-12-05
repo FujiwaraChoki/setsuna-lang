@@ -97,6 +97,17 @@ void runFile(const std::string& path) {
     loadPrelude(env);  // Load standard library prelude
     Evaluator evaluator(env);
 
+    // Set the base path for module resolution
+    fs::path filePath(path);
+    evaluator.setBasePath(filePath.parent_path().string());
+
+    // Add stdlib to search paths
+    std::string preludePath = findPreludePath();
+    if (!preludePath.empty()) {
+        fs::path preludeDir = fs::path(preludePath).parent_path();
+        evaluator.addSearchPath(preludeDir.string());
+    }
+
     auto result = evaluator.eval(program);
 
     // If the result is not unit, print it

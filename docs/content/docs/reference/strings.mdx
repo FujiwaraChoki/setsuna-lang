@@ -247,6 +247,60 @@ replace_all("hello", "l", "L")                       // "heLLo"
 
 **Signature:** `replace_all(string, pattern, replacement) -> String`
 
+## String Interpolation
+
+Use f-strings (interpolated strings) to embed expressions directly in strings:
+
+```typescript
+let name = "Alice"
+let age = 30
+print(f"Hello, {name}!")           // "Hello, Alice!"
+print(f"{name} is {age} years old")  // "Alice is 30 years old"
+```
+
+### Syntax
+
+Prefix a string with `f` and use `{expression}` to embed values:
+
+```typescript
+f"text {expression} more text"
+```
+
+### Expressions in Interpolation
+
+Any valid expression can be used inside `{}`:
+
+```typescript
+let x = 10
+print(f"x squared is {x * x}")     // "x squared is 100"
+print(f"x + 5 = {x + 5}")          // "x + 5 = 15"
+
+let items = [1, 2, 3]
+print(f"List has {len(items)} items")  // "List has 3 items"
+```
+
+### Escaping Braces
+
+Use `\{` to include a literal `{` in the string:
+
+```typescript
+print(f"Use \{name\} for interpolation")  // "Use {name} for interpolation"
+```
+
+### Nested Interpolation
+
+Function calls and complex expressions work inside interpolation:
+
+```typescript
+fn greet(name) { f"Hello, {name}!" }
+
+print(f"Message: {greet(\"World\")}")  // "Message: Hello, World!"
+```
+
+<Tip>
+F-strings are generally preferred over concatenation for building strings with embedded values. They're more readable and don't require explicit `str()` conversions.
+</Tip>
+
 ## String Concatenation
 
 Use the `+` operator to concatenate strings:
@@ -257,7 +311,7 @@ Use the `+` operator to concatenate strings:
 ```
 
 <Note>
-You must use `str()` to convert non-string values before concatenation.
+You must use `str()` to convert non-string values before concatenation. For easier string building, consider using [f-strings](#string-interpolation) instead.
 </Note>
 
 ## Common Patterns
@@ -265,11 +319,17 @@ You must use `str()` to convert non-string values before concatenation.
 ### Building Strings
 
 ```typescript
+// Using f-strings (recommended)
 fn format_person(name, age) {
-    "Name: " + name + ", Age: " + str(age)
+    f"Name: {name}, Age: {age}"
 }
 
 format_person("Alice", 30)  // "Name: Alice, Age: 30"
+
+// Using concatenation
+fn format_person_concat(name, age) {
+    "Name: " + name + ", Age: " + str(age)
+}
 ```
 
 ### Parsing Input

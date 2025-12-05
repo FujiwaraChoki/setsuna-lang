@@ -278,13 +278,84 @@ module Helpers { ... }
 module Misc { ... }
 ```
 
+## Importing Modules from Files
+
+Setsuna supports importing modules from separate files using the `import` statement.
+
+### Basic Import
+
+Create a module file (e.g., `MathUtils.stsn`):
+
+```typescript
+// MathUtils.stsn
+fn square(x) { x * x }
+fn cube(x) { x * x * x }
+let PI = 3.14159
+```
+
+Import and use it in another file:
+
+```typescript
+// main.stsn
+import MathUtils
+
+print(MathUtils::square(5))  // 25
+print(MathUtils::cube(3))    // 27
+print(MathUtils::PI)         // 3.14159
+```
+
+<Note>
+Module access uses `::` syntax (double colon) to access members from imported modules.
+</Note>
+
+### Import with Alias
+
+Use `as` to give an imported module a shorter or different name:
+
+```typescript
+import MathUtils as M
+
+print(M::square(5))  // 25
+print(M::PI)         // 3.14159
+```
+
+### Module Resolution
+
+When you write `import ModuleName`, Setsuna searches for `ModuleName.stsn` in:
+
+1. The directory containing the current file
+2. Additional search paths (if configured)
+3. The standard library directory
+
+### Circular Import Detection
+
+Setsuna detects and prevents circular imports:
+
+```typescript
+// A.stsn
+import B  // If B imports A, this will error
+
+// B.stsn
+import A  // Error: Cyclic import detected
+```
+
+### Module File Structure
+
+Each `.stsn` file can define:
+- Functions with `fn`
+- Constants with `let`
+- Types with `type`
+- Inline modules with `module`
+
+All top-level definitions in a module file are accessible when imported.
+
 ## Current Limitations
 
 <Warning>
-The current Setsuna implementation has these module limitations:
-- No separate module files (all modules in one file)
-- No private/public access control
-- No module imports or re-exports
+The current Setsuna module system has these limitations:
+- No private/public access control (all definitions are public)
+- No selective imports (must import entire module)
+- No re-exports
 </Warning>
 
 ## Next Steps

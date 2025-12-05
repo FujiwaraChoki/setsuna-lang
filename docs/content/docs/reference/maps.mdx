@@ -1,0 +1,345 @@
+---
+title: Map Functions
+description: Hash map (dictionary) operations in Setsuna
+---
+
+# Map Functions
+
+Setsuna provides hash maps (dictionaries) for storing key-value pairs. Maps allow efficient lookup, insertion, and deletion of values by key.
+
+## Overview
+
+| Function | Description |
+|----------|-------------|
+| `map_new` | Create an empty map |
+| `map_get` | Get value by key (errors if missing) |
+| `map_get_or` | Get value by key with default |
+| `map_set` | Set a key-value pair |
+| `map_has` | Check if key exists |
+| `map_remove` | Remove a key |
+| `map_keys` | Get list of all keys |
+| `map_values` | Get list of all values |
+| `map_entries` | Get list of key-value tuples |
+| `map_size` | Get number of entries |
+| `map_empty` | Check if map is empty |
+| `is_map` | Check if value is a map |
+| `map_from_list` | Create map from list of tuples |
+| `map_merge` | Merge two maps |
+
+## Creating Maps
+
+### Map Literal Syntax
+
+Use `%{ }` to create a map with initial entries:
+
+```typescript
+let person = %{ "name": "Alice", "age": 30, "city": "Tokyo" }
+print(person)  // %{ "name": "Alice", "age": 30, "city": "Tokyo" }
+```
+
+### map_new
+
+Create an empty map:
+
+```typescript
+let empty = map_new()
+print(empty)  // %{ }
+```
+
+**Signature:** `map_new() -> Map`
+
+### map_from_list
+
+Create a map from a list of key-value tuples:
+
+```typescript
+let pairs = [("a", 1), ("b", 2), ("c", 3)]
+let m = map_from_list(pairs)
+print(m)  // %{ "a": 1, "b": 2, "c": 3 }
+```
+
+**Signature:** `map_from_list(list) -> Map`
+
+## Accessing Values
+
+### map_get
+
+Get the value associated with a key. Throws an error if the key doesn't exist:
+
+```typescript
+let m = %{ "name": "Alice", "age": 30 }
+print(map_get(m, "name"))  // "Alice"
+print(map_get(m, "age"))   // 30
+print(map_get(m, "foo"))   // Error: Key not found
+```
+
+**Signature:** `map_get(map, key) -> Value`
+
+### map_get_or
+
+Get the value associated with a key, or return a default if the key doesn't exist:
+
+```typescript
+let m = %{ "name": "Alice" }
+print(map_get_or(m, "name", "Unknown"))   // "Alice"
+print(map_get_or(m, "age", 0))            // 0
+print(map_get_or(m, "city", "N/A"))       // "N/A"
+```
+
+**Signature:** `map_get_or(map, key, default) -> Value`
+
+### map_has
+
+Check if a key exists in the map:
+
+```typescript
+let m = %{ "name": "Alice", "age": 30 }
+print(map_has(m, "name"))  // true
+print(map_has(m, "city"))  // false
+```
+
+**Signature:** `map_has(map, key) -> Bool`
+
+## Modifying Maps
+
+### map_set
+
+Set a key-value pair. Returns a new map (maps are immutable):
+
+```typescript
+let m = %{ "name": "Alice" }
+let m2 = map_set(m, "age", 30)
+print(m2)  // %{ "name": "Alice", "age": 30 }
+print(m)   // %{ "name": "Alice" } (original unchanged)
+
+// Overwrite existing key
+let m3 = map_set(m2, "name", "Bob")
+print(m3)  // %{ "name": "Bob", "age": 30 }
+```
+
+**Signature:** `map_set(map, key, value) -> Map`
+
+### map_remove
+
+Remove a key from the map. Returns a new map:
+
+```typescript
+let m = %{ "name": "Alice", "age": 30, "city": "Tokyo" }
+let m2 = map_remove(m, "age")
+print(m2)  // %{ "name": "Alice", "city": "Tokyo" }
+```
+
+**Signature:** `map_remove(map, key) -> Map`
+
+### map_merge
+
+Merge two maps. Keys from the second map overwrite keys from the first:
+
+```typescript
+let m1 = %{ "a": 1, "b": 2 }
+let m2 = %{ "b": 20, "c": 3 }
+let merged = map_merge(m1, m2)
+print(merged)  // %{ "a": 1, "b": 20, "c": 3 }
+```
+
+**Signature:** `map_merge(map1, map2) -> Map`
+
+## Inspecting Maps
+
+### map_keys
+
+Get a list of all keys in the map:
+
+```typescript
+let m = %{ "name": "Alice", "age": 30 }
+print(map_keys(m))  // ["name", "age"]
+```
+
+**Signature:** `map_keys(map) -> List`
+
+### map_values
+
+Get a list of all values in the map:
+
+```typescript
+let m = %{ "name": "Alice", "age": 30 }
+print(map_values(m))  // ["Alice", 30]
+```
+
+**Signature:** `map_values(map) -> List`
+
+### map_entries
+
+Get a list of key-value tuples:
+
+```typescript
+let m = %{ "name": "Alice", "age": 30 }
+print(map_entries(m))  // [("name", "Alice"), ("age", 30)]
+```
+
+**Signature:** `map_entries(map) -> List<(Key, Value)>`
+
+### map_size
+
+Get the number of entries in the map:
+
+```typescript
+let m = %{ "a": 1, "b": 2, "c": 3 }
+print(map_size(m))  // 3
+print(map_size(map_new()))  // 0
+```
+
+**Signature:** `map_size(map) -> Int`
+
+### map_empty
+
+Check if a map is empty:
+
+```typescript
+print(map_empty(map_new()))  // true
+print(map_empty(%{ "a": 1 }))  // false
+```
+
+**Signature:** `map_empty(map) -> Bool`
+
+## Type Checking
+
+### is_map
+
+Check if a value is a map:
+
+```typescript
+print(is_map(%{ "a": 1 }))  // true
+print(is_map([1, 2, 3]))    // false
+print(is_map({ x: 1 }))     // false (this is a record, not a map)
+```
+
+**Signature:** `is_map(value) -> Bool`
+
+<Note>
+Maps (`%{ }`) are different from records (`{ }`). Maps have dynamic string keys and are for key-value data. Records have fixed field names known at compile time.
+</Note>
+
+## Common Patterns
+
+### Building a Map Incrementally
+
+```typescript
+let m = map_new()
+let m = map_set(m, "name", "Alice")
+let m = map_set(m, "age", 30)
+let m = map_set(m, "city", "Tokyo")
+print(m)  // %{ "name": "Alice", "age": 30, "city": "Tokyo" }
+```
+
+### Counting Occurrences
+
+```typescript
+fn count_items(items) {
+    let counts = map_new()
+    for item in items {
+        let current = map_get_or(counts, item, 0)
+        counts = map_set(counts, item, current + 1)
+    }
+    counts
+}
+
+let fruits = ["apple", "banana", "apple", "cherry", "banana", "apple"]
+print(count_items(fruits))
+// %{ "apple": 3, "banana": 2, "cherry": 1 }
+```
+
+### Iterating Over Map Entries
+
+```typescript
+let scores = %{ "Alice": 95, "Bob": 87, "Charlie": 92 }
+
+for entry in map_entries(scores) {
+    let (name, score) = entry
+    print(f"{name}: {score}")
+}
+// Alice: 95
+// Bob: 87
+// Charlie: 92
+```
+
+### Transforming Map Values
+
+```typescript
+fn map_values_transform(m, f) {
+    let result = map_new()
+    for entry in map_entries(m) {
+        let (k, v) = entry
+        result = map_set(result, k, f(v))
+    }
+    result
+}
+
+let prices = %{ "apple": 100, "banana": 80, "cherry": 150 }
+let discounted = map_values_transform(prices, (p) => p * 0.9)
+print(discounted)  // %{ "apple": 90, "banana": 72, "cherry": 135 }
+```
+
+### Filtering Map Entries
+
+```typescript
+fn map_filter(m, pred) {
+    let result = map_new()
+    for entry in map_entries(m) {
+        let (k, v) = entry
+        if pred(k, v) {
+            result = map_set(result, k, v)
+        }
+    }
+    result
+}
+
+let ages = %{ "Alice": 30, "Bob": 17, "Charlie": 25, "David": 15 }
+let adults = map_filter(ages, (name, age) => age >= 18)
+print(adults)  // %{ "Alice": 30, "Charlie": 25 }
+```
+
+## Key Types
+
+Maps support various key types:
+
+```typescript
+// String keys (most common)
+let m1 = %{ "name": "Alice" }
+
+// Integer keys
+let m2 = %{ 1: "one", 2: "two", 3: "three" }
+
+// Mixed keys
+let m3 = %{ "a": 1, 1: "a" }
+```
+
+<Tip>
+String keys are the most common and recommended for most use cases. They work well with JSON serialization and are easy to read.
+</Tip>
+
+## Maps vs Records
+
+| Feature | Maps `%{ }` | Records `{ }` |
+|---------|-------------|---------------|
+| Key type | Dynamic (strings, ints) | Fixed field names |
+| Access | `map_get(m, key)` | `record.field` |
+| Schema | Flexible | Fixed at definition |
+| Use case | Dynamic key-value data | Structured objects |
+
+```typescript
+// Use records for structured data with known fields
+let person = { name: "Alice", age: 30 }
+print(person.name)  // "Alice"
+
+// Use maps for dynamic key-value collections
+let config = %{ "theme": "dark", "language": "en" }
+print(map_get(config, "theme"))  // "dark"
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="List Operations" href="/reference/list-ops" />
+  <Card title="Records" href="/advanced/records" />
+</Cards>

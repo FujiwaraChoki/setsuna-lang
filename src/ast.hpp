@@ -35,6 +35,18 @@ struct StringLiteral {
     SourceLocation loc;
 };
 
+// Interpolated string part - either literal text or an expression
+struct InterpolatedStringPart {
+    bool isExpr;
+    std::string text;     // If !isExpr
+    ExprPtr expr;         // If isExpr
+};
+
+struct InterpolatedStringExpr {
+    std::vector<InterpolatedStringPart> parts;
+    SourceLocation loc;
+};
+
 struct BoolLiteral {
     bool value;
     SourceLocation loc;
@@ -105,6 +117,19 @@ struct IfExpr {
     SourceLocation loc;
 };
 
+struct WhileExpr {
+    ExprPtr condition;
+    ExprPtr body;
+    SourceLocation loc;
+};
+
+struct ForExpr {
+    std::string varName;
+    ExprPtr iterable;
+    ExprPtr body;
+    SourceLocation loc;
+};
+
 struct ListExpr {
     std::vector<ExprPtr> elements;
     SourceLocation loc;
@@ -117,6 +142,11 @@ struct TupleExpr {
 
 struct RecordExpr {
     std::vector<std::pair<std::string, ExprPtr>> fields;
+    SourceLocation loc;
+};
+
+struct MapExpr {
+    std::vector<std::pair<ExprPtr, ExprPtr>> entries;
     SourceLocation loc;
 };
 
@@ -162,6 +192,7 @@ using ExprVariant = std::variant<
     IntLiteral,
     FloatLiteral,
     StringLiteral,
+    InterpolatedStringExpr,
     BoolLiteral,
     Identifier,
     BinaryOp,
@@ -172,9 +203,12 @@ using ExprVariant = std::variant<
     Lambda,
     Call,
     IfExpr,
+    WhileExpr,
+    ForExpr,
     ListExpr,
     TupleExpr,
     RecordExpr,
+    MapExpr,
     FieldAccess,
     MatchExpr,
     Block,

@@ -64,6 +64,84 @@ if x > 20 {
 // Returns () if condition is false
 ```
 
+## Loop Expressions
+
+Setsuna provides `while` and `for` loops for iteration. Like all control flow in Setsuna, loops are expressions that return values.
+
+### While Loops
+
+The `while` loop repeatedly executes a block while a condition is true:
+
+```typescript
+let x = 0
+while x < 5 {
+    print(x)
+    x = x + 1
+}
+// Prints: 0, 1, 2, 3, 4
+```
+
+The loop returns the last value of the body, or `()` if the condition is initially false:
+
+```typescript
+let result = {
+    let count = 0
+    while count < 3 {
+        count = count + 1
+        count * 10
+    }
+}
+print(result)  // 30 (last iteration's value)
+```
+
+### For Loops
+
+The `for` loop iterates over elements in a list:
+
+```typescript
+for x in [1, 2, 3, 4, 5] {
+    print(x * x)
+}
+// Prints: 1, 4, 9, 16, 25
+```
+
+Use `range` to iterate over a range of numbers:
+
+```typescript
+for i in range(0, 5) {
+    print(f"Index: {i}")
+}
+// Prints: Index: 0, Index: 1, ... Index: 4
+```
+
+### Loop Patterns
+
+**Accumulating Results:**
+
+```typescript
+let sum = {
+    let total = 0
+    for n in [1, 2, 3, 4, 5] {
+        total = total + n
+    }
+    total
+}
+print(sum)  // 15
+```
+
+**Processing Collections:**
+
+```typescript
+let names = ["Alice", "Bob", "Charlie"]
+for name in names {
+    print(f"Hello, {name}!")
+}
+```
+
+<Note>
+While loops are useful for imperative-style iteration, consider using higher-order functions like `map`, `filter`, and `fold` for more idiomatic functional programming.
+</Note>
+
 ## Match Expressions
 
 Pattern matching is the preferred way to handle multiple cases:

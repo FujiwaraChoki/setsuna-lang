@@ -47,6 +47,12 @@ struct RecordTypeT {
     std::unordered_map<std::string, TypePtr> fields;
 };
 
+// Map type
+struct MapTypeT {
+    TypePtr keyType;
+    TypePtr valueType;
+};
+
 // ADT type
 struct ADTType {
     std::string name;
@@ -69,6 +75,7 @@ using TypeVariant = std::variant<
     ListTypeT,
     TupleTypeT,
     RecordTypeT,
+    MapTypeT,
     ADTType,
     GenericType
 >;
@@ -131,6 +138,10 @@ inline TypePtr makeTupleType(std::vector<TypePtr> elems) {
 
 inline TypePtr makeRecordType(std::unordered_map<std::string, TypePtr> fields) {
     return std::make_shared<Type>(RecordTypeT{std::move(fields)});
+}
+
+inline TypePtr makeMapType(TypePtr key, TypePtr value) {
+    return std::make_shared<Type>(MapTypeT{key, value});
 }
 
 inline TypePtr makeADTType(const std::string& name, std::vector<TypePtr> args = {}) {

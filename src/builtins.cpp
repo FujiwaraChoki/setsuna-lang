@@ -1396,6 +1396,181 @@ void registerBuiltins(EnvPtr env) {
         auto val = force(args[0]);
         return makeString(jsonStringify(val, 0, true));
     }));
+
+    // ============ Map Operations ============
+
+    // map_new() - Create an empty map
+    env->define("map_new", makeBuiltin("map_new", 0, [](const std::vector<ValuePtr>&) {
+        return makeMap(std::vector<std::pair<ValuePtr, ValuePtr>>{});
+    }));
+
+    // map_get(map, key) - Get value by key, returns the value or throws error if not found
+    env->define("map_get", makeBuiltin("map_get", 2, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+        auto key = force(args[1]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_get: expected map as first argument");
+
+        const MapValue& m = mapVal->asMap();
+        const ValuePtr* val = m.find(key);
+        if (!val) {
+            throw RuntimeError("map_get: key not found");
+        }
+        return *val;
+    }));
+
+    // map_get_or(map, key, default) - Get value by key, returns default if not found
+    env->define("map_get_or", makeBuiltin("map_get_or", 3, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+        auto key = force(args[1]);
+        auto defaultVal = force(args[2]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_get_or: expected map as first argument");
+
+        const MapValue& m = mapVal->asMap();
+        const ValuePtr* val = m.find(key);
+        return val ? *val : defaultVal;
+    }));
+
+    // map_set(map, key, value) - Returns a new map with the key-value pair added/updated
+    env->define("map_set", makeBuiltin("map_set", 3, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+        auto key = force(args[1]);
+        auto value = force(args[2]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_set: expected map as first argument");
+
+        // Create a copy
+        MapValue newMap = mapVal->asMap();
+        newMap.set(key, value);
+        return makeMap(std::move(newMap));
+    }));
+
+    // map_has(map, key) - Check if key exists
+    env->define("map_has", makeBuiltin("map_has", 2, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+        auto key = force(args[1]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_has: expected map as first argument");
+
+        const MapValue& m = mapVal->asMap();
+        return makeBool(m.find(key) != nullptr);
+    }));
+
+    // map_remove(map, key) - Returns a new map with the key removed
+    env->define("map_remove", makeBuiltin("map_remove", 2, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+        auto key = force(args[1]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_remove: expected map as first argument");
+
+        // Create a copy
+        MapValue newMap = mapVal->asMap();
+        newMap.remove(key);
+        return makeMap(std::move(newMap));
+    }));
+
+    // map_keys(map) - Get all keys as a list
+    env->define("map_keys", makeBuiltin("map_keys", 1, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_keys: expected map as argument");
+
+        const MapValue& m = mapVal->asMap();
+        std::vector<ValuePtr> keys;
+        for (const auto& [k, v] : m.entries) {
+            keys.push_back(k);
+        }
+        return makeList(keys);
+    }));
+
+    // map_values(map) - Get all values as a list
+    env->define("map_values", makeBuiltin("map_values", 1, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_values: expected map as argument");
+
+        const MapValue& m = mapVal->asMap();
+        std::vector<ValuePtr> values;
+        for (const auto& [k, v] : m.entries) {
+            values.push_back(v);
+        }
+        return makeList(values);
+    }));
+
+    // map_entries(map) - Get all entries as a list of (key, value) tuples
+    env->define("map_entries", makeBuiltin("map_entries", 1, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_entries: expected map as argument");
+
+        const MapValue& m = mapVal->asMap();
+        std::vector<ValuePtr> entries;
+        for (const auto& [k, v] : m.entries) {
+            entries.push_back(makeTuple({k, v}));
+        }
+        return makeList(entries);
+    }));
+
+    // map_size(map) - Get the number of entries
+    env->define("map_size", makeBuiltin("map_size", 1, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_size: expected map as argument");
+
+        return makeInt(static_cast<int64_t>(mapVal->asMap().entries.size()));
+    }));
+
+    // map_empty(map) - Check if map is empty
+    env->define("map_empty", makeBuiltin("map_empty", 1, [](const std::vector<ValuePtr>& args) {
+        auto mapVal = force(args[0]);
+
+        if (!mapVal->isMap()) throw RuntimeError("map_empty: expected map as argument");
+
+        return makeBool(mapVal->asMap().entries.empty());
+    }));
+
+    // is_map(value) - Type check for map
+    env->define("is_map", makeBuiltin("is_map", 1, [](const std::vector<ValuePtr>& args) {
+        auto val = force(args[0]);
+        return makeBool(val->isMap());
+    }));
+
+    // map_from_list(list) - Create map from list of (key, value) tuples
+    env->define("map_from_list", makeBuiltin("map_from_list", 1, [](const std::vector<ValuePtr>& args) {
+        auto listVal = force(args[0]);
+
+        if (!listVal->isList()) throw RuntimeError("map_from_list: expected list of tuples");
+
+        MapValue m;
+        for (const auto& entry : listVal->asList()) {
+            auto tuple = force(entry);
+            if (!tuple->isTuple() || tuple->asTuple().size() != 2) {
+                throw RuntimeError("map_from_list: expected list of (key, value) tuples");
+            }
+            m.set(tuple->asTuple()[0], tuple->asTuple()[1]);
+        }
+        return makeMap(std::move(m));
+    }));
+
+    // map_merge(map1, map2) - Merge two maps (map2 values override map1)
+    env->define("map_merge", makeBuiltin("map_merge", 2, [](const std::vector<ValuePtr>& args) {
+        auto map1 = force(args[0]);
+        auto map2 = force(args[1]);
+
+        if (!map1->isMap()) throw RuntimeError("map_merge: expected map as first argument");
+        if (!map2->isMap()) throw RuntimeError("map_merge: expected map as second argument");
+
+        // Start with a copy of map1
+        MapValue result = map1->asMap();
+
+        // Add all entries from map2 (overwriting duplicates)
+        for (const auto& [k, v] : map2->asMap().entries) {
+            result.set(k, v);
+        }
+
+        return makeMap(std::move(result));
+    }));
 }
 
 } // namespace setsuna

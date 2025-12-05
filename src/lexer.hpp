@@ -12,6 +12,7 @@ enum class TokenType {
     INT,
     FLOAT,
     STRING,
+    FSTRING,  // Interpolated string f"..."
     IDENT,
 
     // Keywords
@@ -21,6 +22,10 @@ enum class TokenType {
     IF,
     ELSE,
     MATCH,
+    WHILE,
+    FOR,
+    IN,
+    AS,
     TYPE,
     MODULE,
     IMPORT,
@@ -53,8 +58,10 @@ enum class TokenType {
     RBRACE,     // }
     LBRACKET,   // [
     RBRACKET,   // ]
+    MAP_START,  // %{
     COMMA,      // ,
-    COLON,      // :
+    COLON,       // :
+    DOUBLE_COLON, // ::
     SEMICOLON,  // ;
     DOT,        // .
     DOTDOTDOT,  // ...
@@ -106,6 +113,7 @@ private:
     Token makeToken(TokenType type);
     Token readNumber();
     Token readString();
+    Token readFString();
     Token readIdentOrKeyword();
 
     SourceLocation currentLocation() const;

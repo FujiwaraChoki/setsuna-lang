@@ -28,7 +28,10 @@ declaration     ::= let_binding
                   | function_def
                   | type_def
                   | module_def
+                  | import_decl
                   | expression
+
+import_decl     ::= "import" identifier [ "as" identifier ]
 
 let_binding     ::= "let" pattern "=" expression
 
@@ -53,10 +56,16 @@ module_def      ::= "module" identifier "{" { declaration } "}"
 ```text
 expression      ::= if_expr
                   | match_expr
+                  | while_expr
+                  | for_expr
                   | lambda_expr
                   | binary_expr
 
 if_expr         ::= "if" expression block [ "else" ( if_expr | block ) ]
+
+while_expr      ::= "while" expression block
+
+for_expr        ::= "for" identifier "in" expression block
 
 match_expr      ::= "match" expression "{" match_arms "}"
 
@@ -78,11 +87,19 @@ postfix_op      ::= "(" [ arg_list ] ")"    (* function call *)
 
 primary_expr    ::= literal
                   | identifier
+                  | module_access
                   | "(" expression ")"
                   | "[" [ expr_list ] "]"
                   | "(" expression "," expr_list ")"  (* tuple *)
                   | "{" [ field_list ] "}"            (* record *)
+                  | "%{" [ map_entries ] "}"          (* map *)
                   | block
+
+module_access   ::= identifier "::" identifier
+
+map_entries     ::= map_entry { "," map_entry }
+
+map_entry       ::= expression ":" expression
 
 block           ::= "{" { statement } expression "}"
 
@@ -138,6 +155,7 @@ unary_op        ::= "-" | "!"
 literal         ::= integer
                   | float
                   | string
+                  | fstring
                   | boolean
 
 integer         ::= [ "-" ] digit { digit }
@@ -146,10 +164,18 @@ float           ::= [ "-" ] digit { digit } "." digit { digit }
 
 string          ::= '"' { string_char } '"'
 
+fstring         ::= 'f"' { fstring_part } '"'
+
+fstring_part    ::= fstring_char
+                  | "{" expression "}"
+
+fstring_char    ::= <any character except '"', '\', and '{'>
+                  | escape_seq
+
 string_char     ::= <any character except '"' and '\'>
                   | escape_seq
 
-escape_seq      ::= "\\" | '\"' | "\n" | "\t" | "\r"
+escape_seq      ::= "\\" | '\"' | "\n" | "\t" | "\r" | "\{" | "\}"
 
 boolean         ::= "true" | "false"
 
@@ -178,13 +204,14 @@ field           ::= identifier ":" expression
 
 ```
 let     fn      if      else    match
-type    module  true    false
+type    module  import  as      true
+false   while   for     in
 ```
 
 ### Reserved for Future Use
 
 ```
-import  export  trait   impl    where
+export  trait   impl    where
 async   await   mut     ref     pub
 ```
 
@@ -282,6 +309,89 @@ let constant = () => 42
 lambda_expr → "(" param_list ")" "=>" expression
             → "(" "x" ")" "=>" binary_expr
             → "(" "x" ")" "=>" "x" "*" "2"
+```
+
+### Loop Expressions
+
+```typescript
+// While loop
+let x = 0
+while x < 5 {
+    print(x)
+    x = x + 1
+}
+
+// For loop
+for item in [1, 2, 3] {
+    print(item)
+}
+```
+
+**Grammar derivation:**
+```
+while_expr → "while" expression block
+           → "while" "x" "<" "5" block
+
+for_expr → "for" identifier "in" expression block
+         → "for" "item" "in" "[" "1" "," "2" "," "3" "]" block
+```
+
+### Import Declaration
+
+```typescript
+import MathUtils
+import MathUtils as M
+```
+
+**Grammar derivation:**
+```
+import_decl → "import" identifier
+            → "import" "MathUtils"
+
+import_decl → "import" identifier "as" identifier
+            → "import" "MathUtils" "as" "M"
+```
+
+### Module Access
+
+```typescript
+let result = MathUtils::square(5)
+let pi = M::PI
+```
+
+**Grammar derivation:**
+```
+module_access → identifier "::" identifier
+              → "MathUtils" "::" "square"
+```
+
+### Map Literal
+
+```typescript
+let empty = %{ }
+let config = %{ "name": "Alice", "age": 30 }
+```
+
+**Grammar derivation:**
+```
+primary_expr → "%{" map_entries "}"
+             → "%{" map_entry "," map_entry "}"
+             → "%{" "\"name\"" ":" "\"Alice\"" "," "\"age\"" ":" "30" "}"
+```
+
+### F-String (Interpolated String)
+
+```typescript
+let name = "Alice"
+let greeting = f"Hello, {name}!"
+let math = f"2 + 2 = {2 + 2}"
+```
+
+**Grammar derivation:**
+```
+fstring → 'f"' fstring_part fstring_part fstring_part '"'
+        → 'f"' "Hello, " "{" identifier "}" "!" '"'
+        → 'f"' "Hello, " "{" "name" "}" "!" '"'
 ```
 
 ## Precedence and Associativity
